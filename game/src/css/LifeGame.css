@@ -1,0 +1,7 @@
+.cell {
+    border: 1px solid #ddd; /* Add a border to each cell */
+    padding: 5px; /* Add some padding for better spacing */
+    text-align: center; /* Center the text */
+    height: 20px; /* Set a fixed height for better alignment */
+    width: 20px; /* Set a fixed width for better alignment */
+  }
