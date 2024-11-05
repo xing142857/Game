@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
+import Button from 'react-bootstrap/Button';
 
 const LifeGame = () => {
   const gridSize = 60;
+
+  const [turn, nextTurns] = useState();
+
   // Initialize a 60x60 grid where each cell has its own `active` state
   const [cells, setCells] = useState(
     Array.from({ length: gridSize }, () =>
@@ -23,21 +27,24 @@ const LifeGame = () => {
   };
 
   return (
-    <div className="p-4 max-w-3xl w-full mx-auto">
-      <div className="grid grid-cols-60 gap-0 border border-gray-300">
-        {cells.map((row, rowIndex) => (
-          row.map((isActive, colIndex) => (
-            <button
-              key={`${rowIndex}-${colIndex}`}
-              onClick={() => toggleCell(rowIndex, colIndex)}
-              className={`aspect-square border border-gray-300 flex items-center justify-center 
-                ${isActive ? 'bg-blue-500' : 'bg-black'} hover:bg-gray-100 cursor-pointer`}
-            >
-            </button>
-          ))
-        ))}
+    <>
+      <div className="p-4 max-w-3xl w-full mx-auto">
+        <div className="grid grid-cols-60 gap-0 border border-gray-300">
+          {cells.map((row, rowIndex) => (
+            row.map((isActive, colIndex) => (
+              <button
+                key={`${rowIndex}-${colIndex}`}
+                onClick={() => toggleCell(rowIndex, colIndex)}
+                className={`aspect-square border border-gray-300 flex items-center justify-center 
+                  ${isActive ? 'bg-blue-500' : 'bg-black'} hover:bg-gray-100 cursor-pointer`}
+              >
+              </button>
+            ))
+          ))}
+        </div>
       </div>
-    </div>
+      <Button variant="primary" className='absolute inset-y-0 right-28'>Next turn</Button>{' '}
+    </>
   );
 };
 
