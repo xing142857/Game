@@ -27,7 +27,39 @@ const LifeGame = () => {
   // Start next turn
   const next_turn = () => {
     const liveGrid = Array.from({ length: gridSize }, () => Array(gridSize).fill(0));
-    
+    setCells(prevCells => {
+      for (let r = 0; r < prevCells.length; r++) {
+        for (let c = 0; c < prevCells.length; c++) {
+          if (prevCells[r][c]) {
+            if (r>0) {
+              liveGrid[r-1][c] ++;
+              if (c>0) {liveGrid[r-1][c-1] ++}
+              if (c<gridSize-1) {liveGrid[r-1][c+1] ++}
+            }if (r<gridSize-1) {
+              liveGrid[r+1][c] ++;
+              if (c>0) {liveGrid[r+1][c-1] ++}
+              if (c<gridSize-1) {liveGrid[r+1][c+1] ++}
+            }if (c>0) {
+              liveGrid[r][c-1] ++;
+            }if (c<gridSize-1) {
+              liveGrid[r][c+1] ++;
+            }
+          }
+        }
+      }
+      const newCells = prevCells.map((row, r) => 
+        row.map((cell, c) => {
+          if (liveGrid[r][c]<2 || liveGrid[r][c]>3) {
+            return false
+          } else if (liveGrid[r][c]===3) {
+            return true
+          } else {
+            return cell
+          }
+        })
+      );
+      return newCells;
+    })
   }
 
   return (
