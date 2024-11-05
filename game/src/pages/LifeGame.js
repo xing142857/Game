@@ -4,8 +4,6 @@ import Button from 'react-bootstrap/Button';
 const LifeGame = () => {
   const gridSize = 60;
 
-  const [turn, nextTurns] = useState();
-
   // Initialize a 60x60 grid where each cell has its own `active` state
   const [cells, setCells] = useState(
     Array.from({ length: gridSize }, () =>
@@ -26,6 +24,12 @@ const LifeGame = () => {
     });
   };
 
+  // Start next turn
+  const next_turn = () => {
+    const liveGrid = Array.from({ length: gridSize }, () => Array(gridSize).fill(0));
+    
+  }
+
   return (
     <>
       <div className="p-4 max-w-3xl w-full mx-auto">
@@ -43,7 +47,7 @@ const LifeGame = () => {
           ))}
         </div>
       </div>
-      <Button variant="primary" className='absolute inset-y-0 right-28'>Next turn</Button>{' '}
+      <Button variant="primary" className='absolute inset-y-0 right-28' onClick={() => next_turn()}>Next turn</Button>{' '}
     </>
   );
 };
