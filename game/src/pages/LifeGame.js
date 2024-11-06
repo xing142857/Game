@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import Button from 'react-bootstrap/Button';
+import { Button, ButtonGroup } from 'react-bootstrap';
 
 const LifeGame = () => {
   const gridSize = 60;
+
+  const [auto, setAuto] = useState(false);
+  const [intervalId, setIntervalId] = useState(null);
 
   // Initialize a 60x60 grid where each cell has its own `active` state
   const [cells, setCells] = useState(
@@ -14,7 +17,6 @@ const LifeGame = () => {
   // Toggle the active state of a specific cell
   const toggleCell = (rowIndex, colIndex) => {
     setCells(prevCells => {
-      // Create a new grid with the updated state for the selected cell
       const newCells = prevCells.map((row, r) => 
         row.map((cell, c) => 
           r === rowIndex && c === colIndex ? !cell : cell
@@ -24,6 +26,23 @@ const LifeGame = () => {
     });
   };
 
+  // Start automatic turns
+  const auto_turn = () => {
+    if (!auto) {
+      setAuto(true);
+      const id = setInterval(() => {
+        next_turn();
+      }, 1000);
+      setIntervalId(id);
+    }
+  };
+
+  // Stop automatic turns
+  const stop_auto_turn = () => {
+    setAuto(false);
+    clearInterval(intervalId);
+  };
+
   // Start next turn
   const next_turn = () => {
     const liveGrid = Array.from({ length: gridSize }, () => Array(gridSize).fill(0));
@@ -31,36 +50,39 @@ const LifeGame = () => {
       for (let r = 0; r < prevCells.length; r++) {
         for (let c = 0; c < prevCells.length; c++) {
           if (prevCells[r][c]) {
-            if (r>0) {
-              liveGrid[r-1][c] ++;
-              if (c>0) {liveGrid[r-1][c-1] ++}
-              if (c<gridSize-1) {liveGrid[r-1][c+1] ++}
-            }if (r<gridSize-1) {
-              liveGrid[r+1][c] ++;
-              if (c>0) {liveGrid[r+1][c-1] ++}
-              if (c<gridSize-1) {liveGrid[r+1][c+1] ++}
-            }if (c>0) {
-              liveGrid[r][c-1] ++;
-            }if (c<gridSize-1) {
-              liveGrid[r][c+1] ++;
+            if (r > 0) {
+              liveGrid[r-1][c]++;
+              if (c > 0) liveGrid[r-1][c-1]++;
+              if (c < gridSize-1) liveGrid[r-1][c+1]++;
+            }
+            if (r < gridSize-1) {
+              liveGrid[r+1][c]++;
+              if (c > 0) liveGrid[r+1][c-1]++;
+              if (c < gridSize-1) liveGrid[r+1][c+1]++;
+            }
+            if (c > 0) {
+              liveGrid[r][c-1]++;
+            }
+            if (c < gridSize-1) {
+              liveGrid[r][c+1]++;
             }
           }
         }
       }
-      const newCells = prevCells.map((row, r) => 
+      const newCells = prevCells.map((row, r) =>
         row.map((cell, c) => {
-          if (liveGrid[r][c]<2 || liveGrid[r][c]>3) {
-            return false
-          } else if (liveGrid[r][c]===3) {
-            return true
+          if (liveGrid[r][c] < 2 || liveGrid[r][c] > 3) {
+            return false;
+          } else if (liveGrid[r][c] === 3) {
+            return true;
           } else {
-            return cell
+            return cell;
           }
         })
       );
       return newCells;
-    })
-  }
+    });
+  };
 
   return (
     <>
@@ -79,7 +101,11 @@ const LifeGame = () => {
           ))}
         </div>
       </div>
-      <Button variant="primary" className='absolute inset-y-0 right-28' onClick={() => next_turn()}>Next turn</Button>{' '}
+      <ButtonGroup aria-label="Basic example" className='fixed top-4 right-28'>
+        <Button variant="primary" onClick={auto_turn}>Run</Button>
+        <Button variant="primary" onClick={stop_auto_turn}>Stop</Button>
+      </ButtonGroup>
+      <Button variant="primary" className='fixed bottom-4 right-28' onClick={next_turn}>Next turn</Button>
     </>
   );
 };
