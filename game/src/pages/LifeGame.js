@@ -32,7 +32,7 @@ const LifeGame = () => {
       setAuto(true);
       const id = setInterval(() => {
         next_turn();
-      }, 1000);
+      }, 200);
       setIntervalId(id);
     }
   };
@@ -102,10 +102,10 @@ const LifeGame = () => {
         </div>
       </div>
       <ButtonGroup aria-label="Basic example" className='fixed top-4 right-28'>
-        <Button variant="primary" onClick={auto_turn}>Run</Button>
-        <Button variant="primary" onClick={stop_auto_turn}>Stop</Button>
+        <Button variant="primary text-xl" onClick={auto_turn}>Run</Button>
+        <Button variant="primary text-xl" onClick={stop_auto_turn}>Stop</Button>
       </ButtonGroup>
-      <Button variant="primary" className='fixed bottom-4 right-28' onClick={next_turn}>Next turn</Button>
+      <Button variant="primary" className='fixed text-xl top-20 right-28' onClick={next_turn}>Next turn</Button>
     </>
   );
 };
