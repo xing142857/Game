@@ -1,20 +1,30 @@
-import React, { useEffect } from 'react';
+import React, {  } from 'react';
+import { Button, Container } from 'react-bootstrap';
 import ToolboxTheory from '../music/ToolboxTheory.mp3';
+import BurgundianLullaby from '../music/BurgundianLullaby.mp3';
+import { ReactComponent as BlankUSMap } from '../image/BlankUSMap.svg';
 
 const ElectionGame = () => {
-    useEffect(() => {
-        const audio = new Audio(ToolboxTheory);
-        
-        // Play audio when the component mounts
-        audio.play().catch(error => console.error('Error playing audio:', error));
 
-        // Pause audio when the component unmounts
-        return () => {
-            audio.pause();
-        };
-    }, []);
+    const play_music = () => {
+        var audio = new Audio(BurgundianLullaby);
+        audio.play();
+    }
 
-    return null; // No visual elements
-};
+
+    return (
+        <>
+            <Button variant="primary" className='absolute top-3 text-xl' onClick={play_music}>Start</Button>
+            <Container>
+            <div id="map-container">
+                <div id="usa-map">
+                    <BlankUSMap />
+                </div>
+            </div>
+            </Container>
+            
+        </>
+    );
+}
 
 export default ElectionGame;
