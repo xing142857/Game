@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, Container, Image } from 'react-bootstrap';
 import ToolboxTheory from '../music/ToolboxTheory.mp3';
 import BurgundianLullaby from '../music/BurgundianLullaby.mp3';
-import BlankUSMap from '../image/BlankUSMap.js';
+import BlankUSMap from './BlankUSMap.js';
 import Trump from '../image/Trump.jpg'
 import Harris from '../image/Harris.jpg'
 
