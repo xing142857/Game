@@ -8,16 +8,19 @@ import Harris from '../image/Harris.jpg'
 
 const ElectionGame = () => {
 
-    const play_music = () => {
+    const [gameState, setGameState] = useState(false);
+
+    const start_game = () => {
         var audio = new Audio(BurgundianLullaby);
         audio.play();
+        setGameState(true);
     }
 
     return (
         <>
             <Container>
                 <Container>
-                    <Button variant="primary" className='mt-3 text-xl' onClick={play_music}>Start</Button>
+                    <Button variant="primary" className='mt-3 text-xl' onClick={start_game}>Start</Button>
                 </Container>
                 <Container className='flex justify-between mt-10'>
                     <Image alt="Trump" src={Trump} thumbnail width="10%"/>
@@ -27,7 +30,7 @@ const ElectionGame = () => {
             <Container>
             <div id="map-container" className='mt-10'>
                 <div id="usa-map">
-                    <BlankUSMap />
+                    <BlankUSMap gameState={gameState} />
                 </div>
             </div>
             </Container>

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const SVGComponent = (props) => {
+const SVGComponent = (gameState) => {
 
   const [stateColors, setStateColors] = useState(
     Object.fromEntries(
@@ -14,8 +14,33 @@ const SVGComponent = (props) => {
     )
   );
 
+  useEffect(() => {
+    if (gameState) {
+      
+      const intervals = [];
+      const states = Object.keys(stateColors);
+      console.log(gameState);
+      
+      states.forEach((state, index) => {
+        const interval = setInterval(() => {
+          setStateColors(prevColors => ({
+            ...prevColors,
+            [state]: '#FFFFFF'
+          }));
+        }, 1000 * index); // Stagger the intervals
+        
+        intervals.push(interval);
+      });
+    
+      // Cleanup function to clear all intervals
+      return () => {
+        intervals.forEach(interval => clearInterval(interval));
+      };
+    }
+  }, [gameState]);
+
   return(
-    <svg xmlns="http://www.w3.org/2000/svg" width={959} height={593} {...props}>
+    <svg xmlns="http://www.w3.org/2000/svg" width={959} height={593}>
       <title>{"Blank map of the United States, territories not included"}</title>
       <defs>
         <style type="text/css">
