@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const SVGComponent = (gameState) => {
+const SVGComponent = ({gameState}) => {
 
   const [stateColors, setStateColors] = useState(
     Object.fromEntries(
@@ -14,30 +14,53 @@ const SVGComponent = (gameState) => {
     )
   );
 
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   useEffect(() => {
-    if (gameState) {
-      
-      const intervals = [];
-      const states = Object.keys(stateColors);
-      console.log(gameState);
-      
-      states.forEach((state, index) => {
-        const interval = setInterval(() => {
+    const executeFunctions = async () => {
+      if (gameState) {
+        const states = Object.keys(stateColors);
+  
+        for (const state of states) { // Use for...of instead of forEach
+
+          setStateColors(prevColors => ({
+            ...prevColors,
+            [state]: '#610a0d'
+          }));
+          await sleep(100); // Wait before proceeding to the next state
+
           setStateColors(prevColors => ({
             ...prevColors,
             [state]: '#FFFFFF'
           }));
-        }, 1000 * index); // Stagger the intervals
-        
-        intervals.push(interval);
-      });
-    
-      // Cleanup function to clear all intervals
-      return () => {
-        intervals.forEach(interval => clearInterval(interval));
-      };
-    }
+          await sleep(100); // Wait before proceeding to the next step
+  
+          setStateColors(prevColors => ({
+            ...prevColors,
+            [state]: '#610a0d'
+          }));
+          await sleep(100); // Wait before proceeding to the next state
+
+          setStateColors(prevColors => ({
+            ...prevColors,
+            [state]: '#FFFFFF'
+          }));
+          await sleep(100); // Wait before proceeding to the next step
+  
+          setStateColors(prevColors => ({
+            ...prevColors,
+            [state]: '#610a0d'
+          }));
+          await sleep(300); // Wait before proceeding to the next state
+        }
+      }
+    };
+  // 00405b
+    executeFunctions();
   }, [gameState]);
+  
 
   return(
     <svg xmlns="http://www.w3.org/2000/svg" width={959} height={593}>
