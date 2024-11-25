@@ -2,14 +2,68 @@ import React, { useState, useEffect } from 'react';
 
 const SVGComponent = ({gameState}) => {
 
+  const statesResults={ 
+    "ca": true, 
+    "ny": true,
+    "il": true,
+    "nj": true,
+    "va": true,
+    "wa": true,
+    "ma": true,
+    "co": true,
+    "md": true,
+    "mn": true,
+    "or": true,
+    "ct": true,
+    "nm": true,
+    "hi": true,
+    "nh": true,
+    "ri": true,
+    "dc": true,
+    "de": true,
+    "vt": true,
+    "me": true,
+    "ne": false,
+    "pa": false,
+    "ga": false,
+    "nc": false,
+    "mi": false,
+    "az": false,
+    "wi": false,
+    "nv": false,
+    "tx": false,
+    "fl": false,
+    "oh": false,
+    "in": false,
+    "tn": false,
+    "mo": false,
+    "al": false,
+    "sc": false,
+    "ky": false,
+    "la": false,
+    "ok": false,
+    "ar": false,
+    "ia": false,
+    "ks": false,
+    "ms": false,
+    "ut": false,
+    "id": false,
+    "mt": false,
+    "wv": false,
+    "ak": false,
+    "nd": false,
+    "sd": false,
+    "wy": false
+  };
+
   const [stateColors, setStateColors] = useState(
     Object.fromEntries(
       [
-        "al", "ak", "az", "ar", "ca", "co", "ct", "de", "fl", "ga",
-        "hi", "id", "il", "in", "ia", "ks", "ky", "la", "me", "md",
-        "ma", "mi", "mn", "ms", "mo", "mt", "ne", "nv", "nh", "nj", 
-        "nm", "ny", "nc", "nd", "oh", "ok", "or", "pa", "ri", "sc", 
-        "sd", "tn", "tx", "ut", "vt", "va", "wa", "wv", "wi", "wy", "dc"
+        "dc", "wy", "wv", "ok", "id", "nd", "vt", "ar", "md", "ma", 
+        "ky", "sd", "al", "hi", "ca", "tn", "ut", "la", "ms", "mt", 
+        "wa", "ct", "in", "ny", "ri", "ks", "de", "il", "mo", "nj", 
+        "or", "sc", "co", "ak", "me", "oh", "tx", "nm", "ia", "ne", 
+        "va", "fl", "nh", "mn", "az", "mi", "nc", "ga", "wi", "pa", "nv"
       ].map((state) => [state, "#787878"])
     )
   );
@@ -22,42 +76,49 @@ const SVGComponent = ({gameState}) => {
     const executeFunctions = async () => {
       if (gameState) {
         const states = Object.keys(stateColors);
-  
-        for (const state of states) { // Use for...of instead of forEach
+        let color = '#FFFFFF';
+
+        for (let i = 0; i < states.length; i++) {
+
+          if (statesResults[states[i]]) {
+            color = '#00405b';
+          } else {
+            color = '#610a0d';
+          }
 
           setStateColors(prevColors => ({
             ...prevColors,
-            [state]: '#610a0d'
+            [states[i]]: color
           }));
-          await sleep(100); // Wait before proceeding to the next state
+          await sleep(100);
 
           setStateColors(prevColors => ({
             ...prevColors,
-            [state]: '#FFFFFF'
+            [states[i]]: '#FFFFFF'
           }));
-          await sleep(100); // Wait before proceeding to the next step
+          await sleep(100);
   
           setStateColors(prevColors => ({
             ...prevColors,
-            [state]: '#610a0d'
+            [states[i]]: color
           }));
-          await sleep(100); // Wait before proceeding to the next state
+          await sleep(100);
 
           setStateColors(prevColors => ({
             ...prevColors,
-            [state]: '#FFFFFF'
+            [states[i]]: '#FFFFFF'
           }));
-          await sleep(100); // Wait before proceeding to the next step
+          await sleep(100);
   
           setStateColors(prevColors => ({
             ...prevColors,
-            [state]: '#610a0d'
+            [states[i]]: color
           }));
-          await sleep(300); // Wait before proceeding to the next state
+          await sleep(300);
         }
       }
     };
-  // 00405b
+
     executeFunctions();
   }, [gameState]);
   
