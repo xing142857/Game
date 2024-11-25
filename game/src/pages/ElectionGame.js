@@ -23,8 +23,8 @@ const ElectionGame = () => {
                     <Button variant="primary" className='mt-3 text-xl' onClick={start_game}>Start</Button>
                 </Container>
                 <Container className='flex justify-between mt-10'>
-                    <Image alt="Trump" src={Trump} thumbnail width="10%"/>
                     <Image alt="Harris" src={Harris} thumbnail width="10%"/>
+                    <Image alt="Trump" src={Trump} thumbnail width="10%"/>
                 </Container>
             </Container>
             <Container>
