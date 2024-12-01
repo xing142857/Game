@@ -8,6 +8,9 @@ import Harris from '../image/Harris.jpg'
 
 const ElectionGame = () => {
 
+    const [blueBar, setblueBar] = useState(0);
+    const [redBar, setredBar] = useState(0);
+
     const electionCollege = {
         "ca": 54,
         "ny": 28,
@@ -28,8 +31,8 @@ const ElectionGame = () => {
         "dc": 3,
         "de": 3,
         "vt": 3,
-        "me": 2,
-        "ne": 1,
+        "me": 4,
+        "ne": 5,
         "pa": 19,
         "ga": 16,
         "nc": 16,
@@ -77,9 +80,9 @@ const ElectionGame = () => {
             </Container>
             <Container className='w-full flex justify-center items-center mt-10'>
                 <Image className='w-1/12' alt="Harris" src={Harris} thumbnail/>
-                <div className={`h-20 left-1/4 bg-democratic absolute`}></div>
-                <div className='w-6/12 h-20 bg-stone-500'></div>
-                <div className={`h-20 right-1/4 bg-republican absolute`}></div>
+                <div className={`h-20 w-${blueBar}px left-1/4 bg-democratic absolute`}></div>
+                <div className='w-810px h-20 bg-stone-500'></div>
+                <div className={`h-20 w-${redBar}px right-1/4 bg-republican absolute`}></div>
                 <div className='w-1 h-24 bg-stone-100 absolute left-1/2'></div>
                 <Image className='w-1/12' alt="Trump" src={Trump} thumbnail/>
             </Container>
