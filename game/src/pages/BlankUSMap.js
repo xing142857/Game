@@ -1,60 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const SVGComponent = ({gameState}) => {
-
-  const statesResults={ 
-    "ca": true, 
-    "ny": true,
-    "il": true,
-    "nj": true,
-    "va": true,
-    "wa": true,
-    "ma": true,
-    "co": true,
-    "md": true,
-    "mn": true,
-    "or": true,
-    "ct": true,
-    "nm": true,
-    "hi": true,
-    "nh": true,
-    "ri": true,
-    "dc": true,
-    "de": true,
-    "vt": true,
-    "me": true,
-    "ne": false,
-    "pa": false,
-    "ga": false,
-    "nc": false,
-    "mi": false,
-    "az": false,
-    "wi": false,
-    "nv": false,
-    "tx": false,
-    "fl": false,
-    "oh": false,
-    "in": false,
-    "tn": false,
-    "mo": false,
-    "al": false,
-    "sc": false,
-    "ky": false,
-    "la": false,
-    "ok": false,
-    "ar": false,
-    "ia": false,
-    "ks": false,
-    "ms": false,
-    "ut": false,
-    "id": false,
-    "mt": false,
-    "wv": false,
-    "ak": false,
-    "nd": false,
-    "sd": false,
-    "wy": false
-  };
+const SVGComponent = ({prop}) => {
 
   const [stateColors, setStateColors] = useState(
     Object.fromEntries(
@@ -68,60 +14,9 @@ const SVGComponent = ({gameState}) => {
     )
   );
 
-  function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
   useEffect(() => {
-    const executeFunctions = async () => {
-      if (gameState) {
-        const states = Object.keys(stateColors);
-        let color = '#FFFFFF';
-
-        for (let i = 0; i < states.length; i++) {
-
-          if (statesResults[states[i]]) {
-            color = '#00405b';
-          } else {
-            color = '#610a0d';
-          }
-
-          setStateColors(prevColors => ({
-            ...prevColors,
-            [states[i]]: color
-          }));
-          await sleep(100);
-
-          setStateColors(prevColors => ({
-            ...prevColors,
-            [states[i]]: '#FFFFFF'
-          }));
-          await sleep(100);
-  
-          setStateColors(prevColors => ({
-            ...prevColors,
-            [states[i]]: color
-          }));
-          await sleep(100);
-
-          setStateColors(prevColors => ({
-            ...prevColors,
-            [states[i]]: '#FFFFFF'
-          }));
-          await sleep(100);
-  
-          setStateColors(prevColors => ({
-            ...prevColors,
-            [states[i]]: color
-          }));
-          await sleep(300);
-        }
-      }
-    };
-
-    executeFunctions();
-  }, [gameState]);
-  
+    setStateColors(prop)
+  }, [prop]);
 
   return(
     <svg xmlns="http://www.w3.org/2000/svg" width={959} height={593}>

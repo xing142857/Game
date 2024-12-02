@@ -69,13 +69,17 @@ const ElectionGame = () => {
         "wy": false
       };
 
-    const states = [
-        "dc", "wy", "wv", "ok", "id", "nd", "vt", "ar", "md", "ma", 
-        "ky", "sd", "al", "hi", "ca", "tn", "ut", "la", "ms", "mt", 
-        "wa", "ct", "in", "ny", "ri", "ks", "de", "il", "mo", "nj", 
-        "or", "sc", "co", "ak", "me", "oh", "tx", "nm", "ia", "ne", 
-        "va", "fl", "nh", "mn", "az", "mi", "nc", "ga", "wi", "pa", "nv"
-      ];
+      const [stateColors, setStateColors] = useState(
+        Object.fromEntries(
+          [
+            "dc", "wy", "wv", "ok", "id", "nd", "vt", "ar", "md", "ma", 
+            "ky", "sd", "al", "hi", "ca", "tn", "ut", "la", "ms", "mt", 
+            "wa", "ct", "in", "ny", "ri", "ks", "de", "il", "mo", "nj", 
+            "or", "sc", "co", "ak", "me", "oh", "tx", "nm", "ia", "ne", 
+            "va", "fl", "nh", "mn", "az", "mi", "nc", "ga", "wi", "pa", "nv"
+          ].map((state) => [state, "#787878"])
+        )
+      );
 
     const electionCollege = {
         "ca": 54,
@@ -137,23 +141,59 @@ const ElectionGame = () => {
         var audio = new Audio(BurgundianLullaby);
         audio.play();
         setGameState(true);
-    }
 
-    useEffect(() => {
         const executeFunctions = async () => {
-            if (gameState) {
-                for (let i = 0; i < states.length; i++) {
-                    if (statesResults[states[i]]) {
-                        setblueBar(prevBlueBar => prevBlueBar + electionCollege[states[i]]*1.5);
-                    } else {
-                        setredBar(prevRedBar => prevRedBar + electionCollege[states[i]]*1.5);
-                    }
-                    await sleep(700); // Delay for visualization
+            const states = Object.keys(stateColors);
+            let color = '#FFFFFF';
+            for (let i = 0; i < states.length; i++) {
+                // Change bar colour
+                if (statesResults[states[i]]) {
+                    setblueBar(prevBlueBar => prevBlueBar + electionCollege[states[i]]*1.5);
+                } else {
+                    setredBar(prevRedBar => prevRedBar + electionCollege[states[i]]*1.5);
+                }
+
+                if (statesResults[states[i]]) {
+                    color = '#00405b';
+                } else {
+                    color = '#610a0d';
+                }
+    
+                // Change states colour
+                setStateColors(prevColors => ({
+                    ...prevColors,
+                    [states[i]]: color
+                }));
+                await sleep(100);
+    
+                setStateColors(prevColors => ({
+                    ...prevColors,
+                    [states[i]]: '#FFFFFF'
+                }));
+                await sleep(100);
+        
+                setStateColors(prevColors => ({
+                    ...prevColors,
+                    [states[i]]: color
+                }));
+                await sleep(100);
+    
+                setStateColors(prevColors => ({
+                    ...prevColors,
+                    [states[i]]: '#FFFFFF'
+                }));
+                await sleep(100);
+        
+                setStateColors(prevColors => ({
+                    ...prevColors,
+                    [states[i]]: color
+                }));
+                await sleep(300);
                 }
             }
-        };
         executeFunctions();
-    }, [gameState]);
+    }
+
 
     return (
         <>
@@ -175,11 +215,10 @@ const ElectionGame = () => {
             <Container className='w-full'>
             <div id="map-container" className='mt-10 w-full'>
                 <div id="usa-map">
-                    <BlankUSMap gameState={gameState} />
+                    <BlankUSMap prop={stateColors} />
                 </div>
             </div>
             </Container>
-            
         </>
     );
 }
