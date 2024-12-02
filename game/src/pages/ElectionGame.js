@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Container, Image } from 'react-bootstrap';
 import ToolboxTheory from '../music/ToolboxTheory.mp3';
 import BurgundianLullaby from '../music/BurgundianLullaby.mp3';
@@ -8,8 +8,74 @@ import Harris from '../image/Harris.jpg'
 
 const ElectionGame = () => {
 
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     const [blueBar, setblueBar] = useState(0);
     const [redBar, setredBar] = useState(0);
+
+    const statesResults={ 
+        "ca": true, 
+        "ny": true,
+        "il": true,
+        "nj": true,
+        "va": true,
+        "wa": true,
+        "ma": true,
+        "co": true,
+        "md": true,
+        "mn": true,
+        "or": true,
+        "ct": true,
+        "nm": true,
+        "hi": true,
+        "nh": true,
+        "ri": true,
+        "dc": true,
+        "de": true,
+        "vt": true,
+        "me": true,
+        "ne": false,
+        "pa": false,
+        "ga": false,
+        "nc": false,
+        "mi": false,
+        "az": false,
+        "wi": false,
+        "nv": false,
+        "tx": false,
+        "fl": false,
+        "oh": false,
+        "in": false,
+        "tn": false,
+        "mo": false,
+        "al": false,
+        "sc": false,
+        "ky": false,
+        "la": false,
+        "ok": false,
+        "ar": false,
+        "ia": false,
+        "ks": false,
+        "ms": false,
+        "ut": false,
+        "id": false,
+        "mt": false,
+        "wv": false,
+        "ak": false,
+        "nd": false,
+        "sd": false,
+        "wy": false
+      };
+
+    const states = [
+        "dc", "wy", "wv", "ok", "id", "nd", "vt", "ar", "md", "ma", 
+        "ky", "sd", "al", "hi", "ca", "tn", "ut", "la", "ms", "mt", 
+        "wa", "ct", "in", "ny", "ri", "ks", "de", "il", "mo", "nj", 
+        "or", "sc", "co", "ak", "me", "oh", "tx", "nm", "ia", "ne", 
+        "va", "fl", "nh", "mn", "az", "mi", "nc", "ga", "wi", "pa", "nv"
+      ];
 
     const electionCollege = {
         "ca": 54,
@@ -73,6 +139,22 @@ const ElectionGame = () => {
         setGameState(true);
     }
 
+    useEffect(() => {
+        const executeFunctions = async () => {
+            if (gameState) {
+                for (let i = 0; i < states.length; i++) {
+                    if (statesResults[states[i]]) {
+                        setblueBar(prevBlueBar => prevBlueBar + electionCollege[states[i]]*1.5);
+                    } else {
+                        setredBar(prevRedBar => prevRedBar + electionCollege[states[i]]*1.5);
+                    }
+                    await sleep(700); // Delay for visualization
+                }
+            }
+        };
+        executeFunctions();
+    }, [gameState]);
+
     return (
         <>
             <Container>
@@ -80,9 +162,13 @@ const ElectionGame = () => {
             </Container>
             <Container className='w-full flex justify-center items-center mt-10'>
                 <Image className='w-1/12' alt="Harris" src={Harris} thumbnail/>
-                <div className={`h-20 w-${blueBar}px left-1/4 bg-democratic absolute`}></div>
-                <div className='w-810px h-20 bg-stone-500'></div>
-                <div className={`h-20 w-${redBar}px right-1/4 bg-republican absolute`}></div>
+                <div className={`h-20 bg-democratic absolute`} 
+                    style={{ width: `${blueBar}px`, left: `calc(50% - 403.5px)` }}>
+                </div>
+                <div className='w-807px h-20 bg-stone-500'></div>
+                <div className={`h-20 bg-republican absolute`} 
+                    style={{ width: `${redBar}px` , right: `calc(50% - 403.5px)` }}>
+                </div>
                 <div className='w-1 h-24 bg-stone-100 absolute left-1/2'></div>
                 <Image className='w-1/12' alt="Trump" src={Trump} thumbnail/>
             </Container>
