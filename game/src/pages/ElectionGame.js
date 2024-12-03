@@ -15,6 +15,9 @@ const ElectionGame = () => {
     const [blueBar, setblueBar] = useState(0);
     const [redBar, setredBar] = useState(0);
 
+    const [harrisScore, setharrisScore] = useState(0);
+    const [trumpScore, settrumpScore] = useState(0);
+
     const statesResults={ 
         "ca": true, 
         "ny": true,
@@ -200,17 +203,23 @@ const ElectionGame = () => {
             <Container>
                 <Button variant="primary" className='mt-3 text-xl' onClick={start_game}>Start</Button>
             </Container>
-            <Container className='w-full flex justify-center items-center mt-10'>
-                <Image className='w-1/12' alt="Harris" src={Harris} thumbnail/>
-                <div className={`h-20 bg-democratic absolute`} 
+            <Container className='w-full flex justify-center items-center mt-5'>
+                <Container className="w-1/12">
+                    <h2>{harrisScore}</h2>
+                    <Image className="w-full" alt="Harris" src={Harris} thumbnail/>
+                </Container>
+                <div className={`h-20 mt-20 bg-democratic absolute`} 
                     style={{ width: `${blueBar}px`, left: `calc(50% - 403.5px)` }}>
                 </div>
-                <div className='w-807px h-20 bg-stone-500'></div>
-                <div className={`h-20 bg-republican absolute`} 
+                <div className='w-807px h-20 mt-20 bg-stone-500'></div>
+                <div className={`h-20 mt-20 bg-republican absolute`} 
                     style={{ width: `${redBar}px` , right: `calc(50% - 403.5px)` }}>
                 </div>
-                <div className='w-1 h-24 bg-stone-100 absolute left-1/2'></div>
-                <Image className='w-1/12' alt="Trump" src={Trump} thumbnail/>
+                <div className='w-1 h-24 mt-20 bg-stone-100 absolute left-1/2'></div>
+                <Container className="w-1/12">
+                    <h2>{trumpScore}</h2>
+                    <Image className='w-full' alt="Trump" src={Trump} thumbnail/>
+                </Container>
             </Container>
             <Container className='w-full'>
             <div id="map-container" className='mt-10 w-full'>
