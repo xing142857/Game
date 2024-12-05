@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Container, Image } from 'react-bootstrap';
+import { Button, Container, Image} from 'react-bootstrap';
+
 import ToolboxTheory from '../music/ToolboxTheory.mp3';
 import BurgundianLullaby from '../music/BurgundianLullaby.mp3';
 import BlankUSMap from './BlankUSMap.js';
@@ -138,12 +139,10 @@ const ElectionGame = () => {
         "wy": 3,
       };
 
-    const [gameState, setGameState] = useState(false);
 
     const start_game = () => {
         var audio = new Audio(BurgundianLullaby);
         audio.play();
-        setGameState(true);
 
         const executeFunctions = async () => {
             const states = Object.keys(stateColors);
@@ -152,8 +151,10 @@ const ElectionGame = () => {
                 // Change bar colour
                 if (statesResults[states[i]]) {
                     setblueBar(prevBlueBar => prevBlueBar + electionCollege[states[i]]*1.5);
+                    setharrisScore(prevHarrisScore => prevHarrisScore + electionCollege[states[i]])
                 } else {
                     setredBar(prevRedBar => prevRedBar + electionCollege[states[i]]*1.5);
+                    settrumpScore(prevTrumpScore => prevTrumpScore + electionCollege[states[i]])
                 }
 
                 if (statesResults[states[i]]) {
@@ -197,13 +198,34 @@ const ElectionGame = () => {
         executeFunctions();
     }
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    useEffect(() => {
+        setIsModalOpen(true);
+    }, []);
 
     return (
         <>
-            <Container>
-                <Button variant="primary" className='mt-3 text-xl' onClick={start_game}>Start</Button>
-            </Container>
-            <Container className='w-full flex justify-center items-center mt-5'>
+            {isModalOpen && (
+                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50">
+                    <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-96">
+                        <h2 className="text-xl mb-4">Are you sure you want to start the game?</h2>
+                        <div className="flex justify-center items-center">
+                            <button
+                                className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                                onClick={() => {
+                                    start_game();
+                                    setIsModalOpen(false);
+                                }}
+                            >
+                                Yes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <Container className='w-full flex justify-center items-center'>
                 <Container className="w-1/12">
                     <h2>{harrisScore}</h2>
                     <Image className="w-full" alt="Harris" src={Harris} thumbnail/>
