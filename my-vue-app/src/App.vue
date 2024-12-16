@@ -13,7 +13,7 @@ const msg = ref('Hello World!')
 <style scoped>
 .outsideBox {
   width: 90%;
-  height: 900px;
+  height: 800px;
   position: absolute;
   top: 50%;
   left: 50%;
