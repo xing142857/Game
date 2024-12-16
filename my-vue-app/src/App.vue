@@ -5,7 +5,10 @@ const msg = ref('Hello World!')
 </script>
 
 <template>
-  <div class="outsideBox"></div>
+  <div class="outsideBox">
+    <img src="./ShmupSprites/Bar.png" alt="Bar" class="bar">
+    <img src="./ShmupSprites/Bar_empty.png" alt="Bar_empty" class="barEmpty">
+  </div>
   <h1>{{ msg }}</h1>
   <input v-model="msg" />
 </template>
@@ -19,5 +22,14 @@ const msg = ref('Hello World!')
   left: 50%;
   transform: translate(-50%, -50%);
   border: 3px solid green;
+}
+
+.barEmpty{
+  position: absolute;
+}
+
+.bar {
+  position: absolute;
+  width: 10px;
 }
 </style>
