@@ -8,6 +8,7 @@ const msg = ref('Hello World!')
   <div class="outsideBox">
     <img src="./ShmupSprites/Bar.png" alt="Bar" class="bar">
     <img src="./ShmupSprites/Bar_empty.png" alt="Bar_empty" class="barEmpty">
+    <img src="./ShmupSprites/Player.png" alt="Player" class="player">
   </div>
   <h1>{{ msg }}</h1>
   <input v-model="msg" />
@@ -26,10 +27,19 @@ const msg = ref('Hello World!')
 
 .barEmpty{
   position: absolute;
+  height: 20px;
+  width: 20%;
 }
 
 .bar {
   position: absolute;
-  width: 10px;
+  height: 20px;
+  width: 20%;
+}
+
+.player {
+  position: absolute;
+  top: 80%;
+  left: 50%;
 }
 </style>
