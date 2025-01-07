@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+const playerX = ref(50%);
+
 const msg = ref('Hello World!')
+const moveLeft = (_: KeyboardEvent) => {
+  
+}
 </script>
 
 <template>
   <div class="outsideBox">
     <img src="./ShmupSprites/Bar.png" alt="Bar" class="bar">
     <img src="./ShmupSprites/Bar_empty.png" alt="Bar_empty" class="barEmpty">
-    <img src="./ShmupSprites/Player.png" alt="Player" class="player">
+    <img @keydown.left="moveLeft" src="./ShmupSprites/Player.png" alt="Player" class="player">
   </div>
   <h1>{{ msg }}</h1>
   <input v-model="msg" />
