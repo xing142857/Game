@@ -1,22 +1,84 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 
-const playerX = ref(50%);
+// Track player's position
+const playerTop = ref(80) // 80% from top
+const playerLeft = ref(50) // 50% from left
 
-const msg = ref('Hello World!')
-const moveLeft = (_: KeyboardEvent) => {
-  
+// Set to track currently pressed keys
+const pressedKeys = new Set<string>()
+
+// Interval ID for the game loop
+let gameLoopInterval: number | null = null
+
+// Move the player based on pressed keys
+const updatePlayerPosition = () => {
+  const step = 1 // Step size in percentage
+  if (pressedKeys.has('ArrowLeft')) {
+    playerLeft.value = Math.max(playerLeft.value - step, 0) // Prevent moving out of bounds (left edge)
+  }
+  if (pressedKeys.has('ArrowRight')) {
+    playerLeft.value = Math.min(playerLeft.value + step, 93) // Prevent moving out of bounds (right edge)
+  }
+  if (pressedKeys.has('ArrowUp')) {
+    playerTop.value = Math.max(playerTop.value - step, 0) // Prevent moving out of bounds (top edge)
+  }
+  if (pressedKeys.has('ArrowDown')) {
+    playerTop.value = Math.min(playerTop.value + step, 87) // Prevent moving out of bounds (bottom edge)
+  }
 }
+
+// Event handlers to update pressed keys
+const handleKeyDown = (event: KeyboardEvent) => {
+  pressedKeys.add(event.key)
+}
+
+const handleKeyUp = (event: KeyboardEvent) => {
+  pressedKeys.delete(event.key)
+}
+
+// Start the game loop
+const startGameLoop = () => {
+  gameLoopInterval = window.setInterval(() => {
+    updatePlayerPosition()
+  }, 16) // Approx. 60 FPS
+}
+
+// Stop the game loop
+const stopGameLoop = () => {
+  if (gameLoopInterval !== null) {
+    clearInterval(gameLoopInterval)
+    gameLoopInterval = null
+  }
+}
+
+// Attach event listeners and start the game loop on mount
+onMounted(() => {
+  window.addEventListener('keydown', handleKeyDown)
+  window.addEventListener('keyup', handleKeyUp)
+  startGameLoop()
+})
+
+// Clean up event listeners and game loop on unmount
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleKeyDown)
+  window.removeEventListener('keyup', handleKeyUp)
+  stopGameLoop()
+})
 </script>
 
 <template>
   <div class="outsideBox">
     <img src="./ShmupSprites/Bar.png" alt="Bar" class="bar">
     <img src="./ShmupSprites/Bar_empty.png" alt="Bar_empty" class="barEmpty">
-    <img @keydown.left="moveLeft" src="./ShmupSprites/Player.png" alt="Player" class="player">
+    <!-- Player position dynamically controlled via style binding -->
+    <img 
+      src="./ShmupSprites/Player.png" 
+      alt="Player" 
+      class="player" 
+      :style="{ top: playerTop + '%', left: playerLeft + '%' }" 
+    />
   </div>
-  <h1>{{ msg }}</h1>
-  <input v-model="msg" />
 </template>
 
 <style scoped>
@@ -30,7 +92,7 @@ const moveLeft = (_: KeyboardEvent) => {
   border: 3px solid green;
 }
 
-.barEmpty{
+.barEmpty {
   position: absolute;
   height: 20px;
   width: 20%;
@@ -43,8 +105,6 @@ const moveLeft = (_: KeyboardEvent) => {
 }
 
 .player {
-  position: absolute;
-  top: 80%;
-  left: 50%;
+  position: relative;
 }
 </style>
