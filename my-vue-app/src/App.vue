@@ -41,7 +41,7 @@ const handleKeyUp = (event: KeyboardEvent) => {
 const startGameLoop = () => {
   gameLoopInterval = window.setInterval(() => {
     updatePlayerPosition()
-  }, 16) // Approx. 60 FPS
+  }, 30)
 }
 
 // Stop the game loop
