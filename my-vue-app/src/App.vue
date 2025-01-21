@@ -5,11 +5,24 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 const playerTop = ref(80) // 80% from top
 const playerLeft = ref(50) // 50% from left
 
+// Game difficulty
+let difficulty: number = 2
+
 // Set to track currently pressed keys
 const pressedKeys = new Set<string>()
 
 // Interval ID for the game loop
 let gameLoopInterval: number | null = null
+
+// Array to store alien positions
+const alienPositions = ref<Array<number>>([])
+
+// Function to random alien positions
+const randomAlienPositions = () => {
+  alienPositions.value = Array.from({ length: 10 }, () => (
+    Math.random() * 93
+  ))
+}
 
 // Move the player based on pressed keys
 const updatePlayerPosition = () => {
@@ -56,6 +69,7 @@ const stopGameLoop = () => {
 onMounted(() => {
   window.addEventListener('keydown', handleKeyDown)
   window.addEventListener('keyup', handleKeyUp)
+  randomAlienPositions()
   startGameLoop()
 })
 
@@ -63,6 +77,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleKeyDown)
   window.removeEventListener('keyup', handleKeyUp)
+  randomAlienPositions()
   stopGameLoop()
 })
 </script>
@@ -77,6 +92,13 @@ onBeforeUnmount(() => {
       alt="Player" 
       class="player" 
       :style="{ top: playerTop + '%', left: playerLeft + '%' }" 
+    />
+    <img 
+      v-for="i in difficulty" 
+      src="./ShmupSprites/Alien01.png" 
+      alt="bulletPlayer" 
+      class="bulletPlayer"
+      :style="{ top: '0%', left: alienPositions[i] + '%' }" 
     />
   </div>
 </template>
@@ -105,6 +127,12 @@ onBeforeUnmount(() => {
 }
 
 .player {
-  position: relative;
+  position: absolute;
+  transition: top 0.03s linear, left 0.03s linear; /* Smooth movement */
 }
+
+.bulletPlayer{
+  position: absolute;
+}
+
 </style>
