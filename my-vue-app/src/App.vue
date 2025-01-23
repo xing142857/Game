@@ -5,6 +5,10 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 const playerTop = ref(80) // 80% from top
 const playerLeft = ref(50) // 50% from left
 
+// Player and enemy's max width and height in percentage.
+const elementMaxWidth = Math.round(100-(128/window.innerWidth*100))
+const elementMaxHeight =Math.round(100-(128/window.innerHeight*100))
+
 // Game difficulty
 let difficulty: number = 2
 
@@ -20,7 +24,7 @@ const alienPositions = ref<Array<number>>([])
 // Function to random alien positions
 const randomAlienPositions = () => {
   alienPositions.value = Array.from({ length: 10 }, () => (
-    Math.random() * 93
+    Math.random() * elementMaxWidth
   ))
 }
 
@@ -31,13 +35,13 @@ const updatePlayerPosition = () => {
     playerLeft.value = Math.max(playerLeft.value - step, 0) // Prevent moving out of bounds (left edge)
   }
   if (pressedKeys.has('ArrowRight')) {
-    playerLeft.value = Math.min(playerLeft.value + step, 93) // Prevent moving out of bounds (right edge)
+    playerLeft.value = Math.min(playerLeft.value + step, elementMaxWidth) // Prevent moving out of bounds (right edge)
   }
   if (pressedKeys.has('ArrowUp')) {
     playerTop.value = Math.max(playerTop.value - step, 0) // Prevent moving out of bounds (top edge)
   }
   if (pressedKeys.has('ArrowDown')) {
-    playerTop.value = Math.min(playerTop.value + step, 87) // Prevent moving out of bounds (bottom edge)
+    playerTop.value = Math.min(playerTop.value + step, elementMaxHeight) // Prevent moving out of bounds (bottom edge)
   }
 }
 
@@ -87,18 +91,20 @@ onBeforeUnmount(() => {
     <img src="./ShmupSprites/Bar.png" alt="Bar" class="bar">
     <img src="./ShmupSprites/Bar_empty.png" alt="Bar_empty" class="barEmpty">
     <!-- Player position dynamically controlled via style binding -->
+    
+    <img 
+      v-for="i in difficulty" 
+      src="./ShmupSprites/Alien02.png" 
+      alt="bulletPlayer" 
+      class="bulletPlayer"
+      :style="{ top: '0%', left: alienPositions[i] + '%' }" 
+    />
+
     <img 
       src="./ShmupSprites/Player.png" 
       alt="Player" 
       class="player" 
       :style="{ top: playerTop + '%', left: playerLeft + '%' }" 
-    />
-    <img 
-      v-for="i in difficulty" 
-      src="./ShmupSprites/Alien01.png" 
-      alt="bulletPlayer" 
-      class="bulletPlayer"
-      :style="{ top: '0%', left: alienPositions[i] + '%' }" 
     />
   </div>
 </template>
