@@ -1,13 +1,18 @@
 <script setup lang="ts">
+import { RefSymbol } from '@vue/reactivity'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+
+// Player and enemy's max width and height in percentage.
+const elementMaxWidth = Math.round(100-(128/window.innerWidth*100))
+const elementMaxHeight = Math.round(100-(128/window.innerHeight*100))
 
 // Track player's position
 const playerTop = ref(80) // 80% from top
 const playerLeft = ref(50) // 50% from left
 
-// Player and enemy's max width and height in percentage.
-const elementMaxWidth = Math.round(100-(128/window.innerWidth*100))
-const elementMaxHeight =Math.round(100-(128/window.innerHeight*100))
+// Track enemy's position
+const enemyTop = ref(Array(10).fill(0));
+const enemyLeft = ref(Array(10).fill(Math.random() * elementMaxWidth));
 
 // Game difficulty
 let difficulty: number = 2
@@ -18,14 +23,11 @@ const pressedKeys = new Set<string>()
 // Interval ID for the game loop
 let gameLoopInterval: number | null = null
 
-// Array to store alien positions
-const alienPositions = ref<Array<number>>([])
-
 // Function to random alien positions
 const randomAlienPositions = () => {
-  alienPositions.value = Array.from({ length: 10 }, () => (
+  enemyLeft.value = enemyLeft.value.map(() => (
     Math.random() * elementMaxWidth
-  ))
+  ));
 }
 
 // Move the player based on pressed keys
@@ -45,6 +47,17 @@ const updatePlayerPosition = () => {
   }
 }
 
+// Move enemies
+const updateEnemyPosition = () => {
+  enemyTop.value = enemyTop.value.map((top, i) => {
+    if (top >= elementMaxHeight) {
+      enemyLeft.value[i] = Math.random() * elementMaxWidth;
+      return 0;
+    }
+    return top + 1;
+  });
+}
+
 // Event handlers to update pressed keys
 const handleKeyDown = (event: KeyboardEvent) => {
   pressedKeys.add(event.key)
@@ -58,6 +71,7 @@ const handleKeyUp = (event: KeyboardEvent) => {
 const startGameLoop = () => {
   gameLoopInterval = window.setInterval(() => {
     updatePlayerPosition()
+    updateEnemyPosition()
   }, 30)
 }
 
@@ -95,9 +109,9 @@ onBeforeUnmount(() => {
     <img 
       v-for="i in difficulty" 
       src="./ShmupSprites/Alien02.png" 
-      alt="bulletPlayer" 
-      class="bulletPlayer"
-      :style="{ top: '0%', left: alienPositions[i] + '%' }" 
+      alt="Alien02" 
+      class="Alien02"
+      :style="{ top: enemyTop[i] + '%', left: enemyLeft[i] + '%' }" 
     />
 
     <img 
@@ -137,8 +151,9 @@ onBeforeUnmount(() => {
   transition: top 0.03s linear, left 0.03s linear; /* Smooth movement */
 }
 
-.bulletPlayer{
+.Alien02 {
   position: absolute;
+  transition: top 0.03s linear, left 0.03s linear; /* Smooth movement */
 }
 
 </style>
