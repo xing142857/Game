@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { RefSymbol } from '@vue/reactivity'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 // Player and enemy's max width and height in percentage.
@@ -13,6 +12,7 @@ const playerLeft = ref(50) // 50% from left
 // Track enemy's position
 const enemyTop = ref(Array(10).fill(0));
 const enemyLeft = ref(Array(10).fill(Math.random() * elementMaxWidth));
+const enemyTransition = ref(Array(10).fill(true)) // Smooth transition state for each enemy
 
 // Game difficulty
 let difficulty: number = 2
@@ -52,9 +52,13 @@ const updateEnemyPosition = () => {
   enemyTop.value = enemyTop.value.map((top, i) => {
     if (top >= elementMaxHeight) {
       enemyLeft.value[i] = Math.random() * elementMaxWidth;
+      enemyTransition.value[i] = false;
       return 0;
     }
-    return top + 1;
+    else{
+      enemyTransition.value[i] = true;
+      return top + 1;
+    }
   });
 }
 
@@ -111,7 +115,11 @@ onBeforeUnmount(() => {
       src="./ShmupSprites/Alien02.png" 
       alt="Alien02" 
       class="Alien02"
-      :style="{ top: enemyTop[i] + '%', left: enemyLeft[i] + '%' }" 
+      :style="{
+        top: enemyTop[i] + '%',
+        left: enemyLeft[i] + '%',
+        transition: enemyTransition[i] ? 'top 0.03s linear, left 0.03s linear' : 'none'
+      }" 
     />
 
     <img 
@@ -153,7 +161,6 @@ onBeforeUnmount(() => {
 
 .Alien02 {
   position: absolute;
-  transition: top 0.03s linear, left 0.03s linear; /* Smooth movement */
 }
 
 </style>
