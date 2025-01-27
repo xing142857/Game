@@ -13,9 +13,10 @@ const playerLeft = ref(50) // 50% from left
 const enemyTop = ref(Array(10).fill(0));
 const enemyLeft = ref(Array(10).fill(Math.random() * elementMaxWidth));
 const enemyTransition = ref(Array(10).fill(true)) // Smooth transition state for each enemy
+const enemySleep = ref(Array(10).fill(0).map(() => Math.round(Math.random() * 100))); // Track how long enemy should sleep
 
 // Game difficulty
-let difficulty: number = 2
+let difficulty: number = 5
 
 // Set to track currently pressed keys
 const pressedKeys = new Set<string>()
@@ -50,10 +51,23 @@ const updatePlayerPosition = () => {
 // Move enemies
 const updateEnemyPosition = () => {
   enemyTop.value = enemyTop.value.map((top, i) => {
-    if (top >= elementMaxHeight) {
-      enemyLeft.value[i] = Math.random() * elementMaxWidth;
+    
+    if (enemySleep.value[i] > 0) {
       enemyTransition.value[i] = false;
+      enemySleep.value[i] -= 1;
+      enemyLeft.value[i] = -100;
+      return -100
+    }
+    else if (enemySleep.value[i] == 0) {
+      enemyTransition.value[i] = false;
+      enemySleep.value[i] = -1;
+      enemyLeft.value[i] = Math.random() * elementMaxWidth;
       return 0;
+    }
+    else if (top >= elementMaxHeight) {
+      enemyTransition.value[i] = false;
+      enemySleep.value[i] = Math.round(Math.random() * 100);
+      return -100;
     }
     else{
       enemyTransition.value[i] = true;
