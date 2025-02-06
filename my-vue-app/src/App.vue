@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, Ref, onMounted, onBeforeUnmount } from 'vue'
 
 // Player and enemy's max width and height in percentage.
 const elementMaxWidth = Math.round(100-(128/window.innerWidth*100))
@@ -9,14 +9,46 @@ const elementMaxHeight = Math.round(100-(128/window.innerHeight*100))
 const playerTop = ref(80) // 80% from top
 const playerLeft = ref(50) // 50% from left
 
-// Track enemy's position
-const enemyTop = ref(Array(10).fill(0));
-const enemyLeft = ref(Array(10).fill(Math.random() * elementMaxWidth));
-const enemyTransition = ref(Array(10).fill(true)) // Smooth transition state for each enemy
-const enemySleep = ref(Array(10).fill(0).map(() => Math.round(Math.random() * 100))); // Track how long enemy should sleep
-
 // Game difficulty
-let difficulty: number = 5
+let difficulty = 10
+
+// Enemy Class
+class Enemy {
+  private enemyTop: number;
+  private enemyLeft: number;
+  private enemyTransition: boolean;
+  private enemySleep: number;
+  private elementMaxWidth: number;
+
+  constructor(elementMaxWidth: number) {
+    this.elementMaxWidth = elementMaxWidth;
+    this.enemyTop = 0;
+    this.enemyLeft = Math.random() * this.elementMaxWidth;
+    this.enemyTransition = true;
+    this.enemySleep = Math.round(Math.random() * 100);
+  }
+
+  getTopPosition(): number {return this.enemyTop;}
+
+  getLeftPosition(): number {return this.enemyLeft;}
+
+  getTransitionState(): boolean {return this.enemyTransition;}
+
+  getSleepTime(): number {return this.enemySleep;}
+
+  setTopPosition(top: number): void {this.enemyTop = top}
+
+  setLeftPosition(left: number): void {this.enemyLeft = left} 
+
+  setEnemySleep(sleepTime: number): void {this.enemySleep = sleepTime}
+
+  toggleTransition(state: boolean): void {this.enemyTransition = state}
+}
+
+// Enemy Array
+const enemyArray = ref<Enemy[]>(
+  Array.from({ length: difficulty }, () => new Enemy(elementMaxWidth))
+);
 
 // Set to track currently pressed keys
 const pressedKeys = new Set<string>()
@@ -26,9 +58,9 @@ let gameLoopInterval: number | null = null
 
 // Function to random alien positions
 const randomAlienPositions = () => {
-  enemyLeft.value = enemyLeft.value.map(() => (
-    Math.random() * elementMaxWidth
-  ));
+  enemyArray.value.forEach((enemy) => (
+    enemy.setLeftPosition(Math.random() * elementMaxWidth)
+  ))
 }
 
 // Move the player based on pressed keys
@@ -48,30 +80,62 @@ const updatePlayerPosition = () => {
   }
 }
 
+// // Move enemies
+// const updateEnemyPosition = () => {
+//   enemyTop.value = enemyTop.value.map((top, i) => {
+    
+//     if (enemySleep.value[i] > 0) {
+//       enemyTransition.value[i] = false;
+//       enemySleep.value[i] -= 1;
+//       enemyLeft.value[i] = -100;
+//       return -100
+//     }
+//     else if (enemySleep.value[i] == 0) {
+//       enemyTransition.value[i] = false;
+//       enemySleep.value[i] = -1;
+//       enemyLeft.value[i] = Math.random() * elementMaxWidth;
+//       return 0;
+//     }
+//     else if (top >= elementMaxHeight) {
+//       enemyTransition.value[i] = false;
+//       enemySleep.value[i] = Math.round(Math.random() * 100);
+//       return -100;
+//     }
+//     else{
+//       enemyTransition.value[i] = true;
+//       return top + 1;
+//     }
+//   });
+// }
+
 // Move enemies
 const updateEnemyPosition = () => {
-  enemyTop.value = enemyTop.value.map((top, i) => {
+  enemyArray.value.forEach((enemy) => {
     
-    if (enemySleep.value[i] > 0) {
-      enemyTransition.value[i] = false;
-      enemySleep.value[i] -= 1;
-      enemyLeft.value[i] = -100;
+    if (enemy.getSleepTime() > 0) {
+      enemy.toggleTransition(false);
+      enemy.setEnemySleep(enemy.getSleepTime()-1);
+      enemy.setLeftPosition(-100);
+      enemy.setTopPosition(-100);
       return -100
     }
-    else if (enemySleep.value[i] == 0) {
-      enemyTransition.value[i] = false;
-      enemySleep.value[i] = -1;
-      enemyLeft.value[i] = Math.random() * elementMaxWidth;
+    else if (enemy.getSleepTime() == 0) {
+      enemy.toggleTransition(false);
+      enemy.setEnemySleep(enemy.getSleepTime()-1);
+      enemy.setLeftPosition(Math.random() * elementMaxWidth);
+      enemy.setTopPosition(0);
       return 0;
     }
-    else if (top >= elementMaxHeight) {
-      enemyTransition.value[i] = false;
-      enemySleep.value[i] = Math.round(Math.random() * 100);
+    else if (enemy.getTopPosition() >= elementMaxHeight) {
+      enemy.toggleTransition(false);
+      enemy.setEnemySleep(Math.round(Math.random() * 100));
+      enemy.setTopPosition(-100);
       return -100;
     }
     else{
-      enemyTransition.value[i] = true;
-      return top + 1;
+      enemy.toggleTransition(true);
+      enemy.setTopPosition(enemy.getTopPosition()+1);
+      return 1;
     }
   });
 }
@@ -125,14 +189,15 @@ onBeforeUnmount(() => {
     <!-- Player position dynamically controlled via style binding -->
     
     <img 
-      v-for="i in difficulty" 
+      v-for="(_, i) in enemyArray" 
+      :key="i"
       src="./ShmupSprites/Alien02.png" 
       alt="Alien02" 
       class="Alien02"
       :style="{
-        top: enemyTop[i] + '%',
-        left: enemyLeft[i] + '%',
-        transition: enemyTransition[i] ? 'top 0.03s linear, left 0.03s linear' : 'none'
+        top: enemyArray[i].getTopPosition() + '%',
+        left: enemyArray[i].getLeftPosition() + '%',
+        transition: enemyArray[i].getTransitionState() ? 'top 0.03s linear, left 0.03s linear' : 'none'
       }" 
     />
 
