@@ -1,16 +1,36 @@
 <script setup lang="ts">
-import { ref, Ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 // Player and enemy's max width and height in percentage.
 const elementMaxWidth = Math.round(100-(128/window.innerWidth*100))
 const elementMaxHeight = Math.round(100-(128/window.innerHeight*100))
 
-// Track player's position
-const playerTop = ref(80) // 80% from top
-const playerLeft = ref(50) // 50% from left
-
 // Game difficulty
-let difficulty = 10
+let difficulty = 30
+
+// Player Class
+class Player {
+  private playerTop: number;
+  private playerLeft: number;
+  private life: number;
+  constructor() {
+    this.playerLeft = 80;
+    this.playerTop = 50;
+    this.life = 100;
+  }
+
+  getTopPosition(): number {return this.playerTop;}
+
+  getLeftPosition(): number {return this.playerLeft;}
+
+  getLife(): number {return this.life;}
+
+  setTopPosition(top: number): void {this.playerTop = top}
+
+  setLeftPosition(left: number): void {this.playerLeft = left} 
+
+  setLife(life: number): void {this.life = life} 
+}
 
 // Enemy Class
 class Enemy {
@@ -50,6 +70,9 @@ const enemyArray = ref<Enemy[]>(
   Array.from({ length: difficulty }, () => new Enemy(elementMaxWidth))
 );
 
+// Player
+const player = ref(new Player())
+
 // Set to track currently pressed keys
 const pressedKeys = new Set<string>()
 
@@ -67,46 +90,18 @@ const randomAlienPositions = () => {
 const updatePlayerPosition = () => {
   const step = 1 // Step size in percentage
   if (pressedKeys.has('ArrowLeft')) {
-    playerLeft.value = Math.max(playerLeft.value - step, 0) // Prevent moving out of bounds (left edge)
+    player.value.setLeftPosition(Math.max(player.value.getLeftPosition() - step, 0)) // Prevent moving out of bounds (left edge)
   }
   if (pressedKeys.has('ArrowRight')) {
-    playerLeft.value = Math.min(playerLeft.value + step, elementMaxWidth) // Prevent moving out of bounds (right edge)
+    player.value.setLeftPosition(Math.min(player.value.getLeftPosition() + step, elementMaxWidth)) // Prevent moving out of bounds (right edge)
   }
   if (pressedKeys.has('ArrowUp')) {
-    playerTop.value = Math.max(playerTop.value - step, 0) // Prevent moving out of bounds (top edge)
+    player.value.setTopPosition(Math.max(player.value.getTopPosition() - step, 0)) // Prevent moving out of bounds (top edge)
   }
   if (pressedKeys.has('ArrowDown')) {
-    playerTop.value = Math.min(playerTop.value + step, elementMaxHeight) // Prevent moving out of bounds (bottom edge)
+    player.value.setTopPosition(Math.min(player.value.getTopPosition() + step, elementMaxHeight)) // Prevent moving out of bounds (bottom edge)
   }
 }
-
-// // Move enemies
-// const updateEnemyPosition = () => {
-//   enemyTop.value = enemyTop.value.map((top, i) => {
-    
-//     if (enemySleep.value[i] > 0) {
-//       enemyTransition.value[i] = false;
-//       enemySleep.value[i] -= 1;
-//       enemyLeft.value[i] = -100;
-//       return -100
-//     }
-//     else if (enemySleep.value[i] == 0) {
-//       enemyTransition.value[i] = false;
-//       enemySleep.value[i] = -1;
-//       enemyLeft.value[i] = Math.random() * elementMaxWidth;
-//       return 0;
-//     }
-//     else if (top >= elementMaxHeight) {
-//       enemyTransition.value[i] = false;
-//       enemySleep.value[i] = Math.round(Math.random() * 100);
-//       return -100;
-//     }
-//     else{
-//       enemyTransition.value[i] = true;
-//       return top + 1;
-//     }
-//   });
-// }
 
 // Move enemies
 const updateEnemyPosition = () => {
@@ -205,7 +200,7 @@ onBeforeUnmount(() => {
       src="./ShmupSprites/Player.png" 
       alt="Player" 
       class="player" 
-      :style="{ top: playerTop + '%', left: playerLeft + '%' }" 
+      :style="{ top: player.getTopPosition() + '%', left: player.getLeftPosition() + '%' }" 
     />
   </div>
 </template>
