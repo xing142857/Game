@@ -29,7 +29,7 @@ class Player {
 
   setLeftPosition(left: number): void {this.playerLeft = left} 
 
-  setLife(life: number): void {this.life = life} 
+  setLife(life: number): void {this.life = Math.max(life, 0)} 
 }
 
 // Enemy Class
@@ -135,6 +135,14 @@ const updateEnemyPosition = () => {
   });
 }
 
+// Check collision
+const checkCollision = () => {
+  if (enemyArray.value.filter(enemy => Math.abs(enemy.getLeftPosition()-player.value.getLeftPosition()) < (128/window.innerHeight*100)*0.5 && Math.abs(enemy.getTopPosition()-player.value.getTopPosition()) < (128/window.innerHeight*100)*0.5).length>0) {
+    player.value.setLife(player.value.getLife()-1)
+    console.log(player.value.getLife())
+  }
+}
+
 // Event handlers to update pressed keys
 const handleKeyDown = (event: KeyboardEvent) => {
   pressedKeys.add(event.key)
@@ -149,6 +157,7 @@ const startGameLoop = () => {
   gameLoopInterval = window.setInterval(() => {
     updatePlayerPosition()
     updateEnemyPosition()
+    checkCollision()
   }, 30)
 }
 
@@ -208,7 +217,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .outsideBox {
   width: 90%;
-  height: 800px;
+  height: 90vh;
   position: absolute;
   top: 50%;
   left: 50%;
