@@ -2,8 +2,8 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 // Player and enemy's max width and height in percentage.
-const elementMaxWidth = Math.round(100-(128/window.innerWidth*100))
-const elementMaxHeight = Math.round(100-(128/window.innerHeight*100))
+const ELEMENTMAXWIDTH = 95
+const ELEMENTMAXHEIGHT = 95
 
 // Game difficulty
 let difficulty = 30
@@ -38,12 +38,12 @@ class Enemy {
   private enemyLeft: number;
   private enemyTransition: boolean;
   private enemySleep: number;
-  private elementMaxWidth: number;
+  private ELEMENTMAXWIDTH: number;
 
-  constructor(elementMaxWidth: number) {
-    this.elementMaxWidth = elementMaxWidth;
+  constructor(ELEMENTMAXWIDTH: number) {
+    this.ELEMENTMAXWIDTH = ELEMENTMAXWIDTH;
     this.enemyTop = 0;
-    this.enemyLeft = Math.random() * this.elementMaxWidth;
+    this.enemyLeft = Math.random() * this.ELEMENTMAXWIDTH;
     this.enemyTransition = true;
     this.enemySleep = Math.round(Math.random() * 100);
   }
@@ -67,7 +67,7 @@ class Enemy {
 
 // Enemy Array
 const enemyArray = ref<Enemy[]>(
-  Array.from({ length: difficulty }, () => new Enemy(elementMaxWidth))
+  Array.from({ length: difficulty }, () => new Enemy(ELEMENTMAXWIDTH))
 );
 
 // Player
@@ -82,7 +82,7 @@ let gameLoopInterval: number | null = null
 // Function to random alien positions
 const randomAlienPositions = () => {
   enemyArray.value.forEach((enemy) => (
-    enemy.setLeftPosition(Math.random() * elementMaxWidth)
+    enemy.setLeftPosition(Math.random() * ELEMENTMAXWIDTH)
   ))
 }
 
@@ -93,13 +93,14 @@ const updatePlayerPosition = () => {
     player.value.setLeftPosition(Math.max(player.value.getLeftPosition() - step, 0)) // Prevent moving out of bounds (left edge)
   }
   if (pressedKeys.has('ArrowRight')) {
-    player.value.setLeftPosition(Math.min(player.value.getLeftPosition() + step, elementMaxWidth)) // Prevent moving out of bounds (right edge)
+    player.value.setLeftPosition(Math.min(player.value.getLeftPosition() + step, ELEMENTMAXWIDTH)) // Prevent moving out of bounds (right edge)
   }
   if (pressedKeys.has('ArrowUp')) {
     player.value.setTopPosition(Math.max(player.value.getTopPosition() - step, 0)) // Prevent moving out of bounds (top edge)
   }
   if (pressedKeys.has('ArrowDown')) {
-    player.value.setTopPosition(Math.min(player.value.getTopPosition() + step, elementMaxHeight)) // Prevent moving out of bounds (bottom edge)
+    player.value.setTopPosition(Math.min(player.value.getTopPosition() + step, ELEMENTMAXHEIGHT
+)) // Prevent moving out of bounds (bottom edge)
   }
 }
 
@@ -117,11 +118,12 @@ const updateEnemyPosition = () => {
     else if (enemy.getSleepTime() == 0) {
       enemy.toggleTransition(false);
       enemy.setEnemySleep(enemy.getSleepTime()-1);
-      enemy.setLeftPosition(Math.random() * elementMaxWidth);
+      enemy.setLeftPosition(Math.random() * ELEMENTMAXWIDTH);
       enemy.setTopPosition(0);
       return 0;
     }
-    else if (enemy.getTopPosition() >= elementMaxHeight) {
+    else if (enemy.getTopPosition() >= ELEMENTMAXHEIGHT
+) {
       enemy.toggleTransition(false);
       enemy.setEnemySleep(Math.round(Math.random() * 100));
       enemy.setTopPosition(-100);
@@ -188,7 +190,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="outsideBox">
-    <img src="./ShmupSprites/Bar.png" alt="Bar" class="bar">
+    <img src="./ShmupSprites/Bar.png" alt="Bar" class="bar" :style="{ width: player.getLife()*0.2 + '%' }">
     <img src="./ShmupSprites/Bar_empty.png" alt="Bar_empty" class="barEmpty">
     <!-- Player position dynamically controlled via style binding -->
     
@@ -234,7 +236,7 @@ onBeforeUnmount(() => {
 .bar {
   position: absolute;
   height: 20px;
-  width: 20%;
+  transition: width 0.3s ease-in-out;
 }
 
 .player {
