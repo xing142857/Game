@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 
-// Player and enemy's max width and height in percentage.
+// Player and enemy's size in percentage of the screen.
+const ELEMENTSIZE = 10
+
+// Player and enemy's max width and height in percentage of the screen.
 const ELEMENTMAXWIDTH = 95
-const ELEMENTMAXHEIGHT = 95
+const ELEMENTMAXHEIGHT = 90
 
 // Game difficulty
 let difficulty = 30
@@ -186,11 +189,14 @@ onBeforeUnmount(() => {
   randomAlienPositions()
   stopGameLoop()
 })
+
+// Reactive bar width based on player's life
+const barWidth = computed(() => player.value.getLife() * 0.2 + '%')
 </script>
 
 <template>
   <div class="outsideBox">
-    <img src="./ShmupSprites/Bar.png" alt="Bar" class="bar" :style="{ width: player.getLife()*0.2 + '%' }">
+    <img src="./ShmupSprites/Bar.png" alt="Bar" class="bar">
     <img src="./ShmupSprites/Bar_empty.png" alt="Bar_empty" class="barEmpty">
     <!-- Player position dynamically controlled via style binding -->
     
@@ -236,6 +242,7 @@ onBeforeUnmount(() => {
 .bar {
   position: absolute;
   height: 20px;
+  width: v-bind(barWidth);
   transition: width 0.3s ease-in-out;
 }
 
