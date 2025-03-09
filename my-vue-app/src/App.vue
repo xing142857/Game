@@ -5,8 +5,8 @@ import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 const ELEMENTSIZE = 10
 
 // Player and enemy's max width and height in percentage of the screen.
-const ELEMENTMAXWIDTH = 95
-const ELEMENTMAXHEIGHT = 90
+const ELEMENTMAXWIDTH = 90
+const ELEMENTMAXHEIGHT = 80
 
 // Game difficulty
 let difficulty = 30
@@ -142,7 +142,7 @@ const updateEnemyPosition = () => {
 
 // Check collision
 const checkCollision = () => {
-  if (enemyArray.value.filter(enemy => Math.abs(enemy.getLeftPosition()-player.value.getLeftPosition()) < (128/window.innerHeight*100)*0.5 && Math.abs(enemy.getTopPosition()-player.value.getTopPosition()) < (128/window.innerHeight*100)*0.5).length>0) {
+  if (enemyArray.value.filter(enemy => Math.abs(enemy.getLeftPosition()-player.value.getLeftPosition()) < ELEMENTSIZE*0.5 && Math.abs(enemy.getTopPosition()-player.value.getTopPosition()) < ELEMENTSIZE*0.5).length>0) {
     player.value.setLife(player.value.getLife()-1)
     console.log(player.value.getLife())
   }
@@ -192,6 +192,8 @@ onBeforeUnmount(() => {
 
 // Reactive bar width based on player's life
 const barWidth = computed(() => player.value.getLife() * 0.2 + '%')
+// Element size in string percentage of the screen
+const elementSize = ELEMENTSIZE + '%'
 </script>
 
 <template>
@@ -249,10 +251,12 @@ const barWidth = computed(() => player.value.getLife() * 0.2 + '%')
 .player {
   position: absolute;
   transition: top 0.03s linear, left 0.03s linear; /* Smooth movement */
+  width: v-bind(elementSize)
 }
 
 .Alien02 {
   position: absolute;
+  width: v-bind(elementSize)
 }
 
 </style>
