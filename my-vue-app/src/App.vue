@@ -2,14 +2,14 @@
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 
 // Player and enemy's size in percentage of the screen.
-const ELEMENTSIZE = 10
+const ELEMENTSIZE = 5
 
 // Player and enemy's max width and height in percentage of the screen.
-const ELEMENTMAXWIDTH = 90
-const ELEMENTMAXHEIGHT = 80
+const ELEMENTMAXWIDTH = 100-ELEMENTSIZE
+const ELEMENTMAXHEIGHT = 100-ELEMENTSIZE*2
 
 // Game difficulty
-let difficulty = 30
+let difficulty = 100
 
 // Player Class
 class Player {
@@ -68,6 +68,24 @@ class Enemy {
   toggleTransition(state: boolean): void {this.enemyTransition = state}
 }
 
+// BulletPlayer Class
+class BulletPlayer {
+  private bulletPlayerTop: number;
+  private bulletPlayerLeft: number;
+  constructor() {
+    this.bulletPlayerLeft = 80;
+    this.bulletPlayerTop = 50;
+  }
+
+  getTopPosition(): number {return this.bulletPlayerTop;}
+
+  getLeftPosition(): number {return this.bulletPlayerLeft;}
+
+  setTopPosition(top: number): void {this.bulletPlayerTop = top}
+
+  setLeftPosition(left: number): void {this.bulletPlayerLeft = left} 
+}
+
 // Enemy Array
 const enemyArray = ref<Enemy[]>(
   Array.from({ length: difficulty }, () => new Enemy(ELEMENTMAXWIDTH))
@@ -75,6 +93,11 @@ const enemyArray = ref<Enemy[]>(
 
 // Player
 const player = ref(new Player())
+
+// Player Bullet Array
+const bulletPlayerArray = ref<BulletPlayer[]>(
+  Array.from({ length: 100 }, () => new BulletPlayer())
+);
 
 // Set to track currently pressed keys
 const pressedKeys = new Set<string>()
@@ -213,6 +236,14 @@ const elementSize = ELEMENTSIZE + '%'
         left: enemyArray[i].getLeftPosition() + '%',
         transition: enemyArray[i].getTransitionState() ? 'top 0.03s linear, left 0.03s linear' : 'none'
       }" 
+    />
+
+    <img 
+      v-for="(_, i) in bulletPlayerArray" 
+      :key="i"
+      src="./ShmupSprites/Bullet_player.png" 
+      alt="bulletPlayer" 
+      class="bulletPlayer"
     />
 
     <img 
