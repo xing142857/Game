@@ -15,24 +15,57 @@ let difficulty = 100
 class Player {
   private playerTop: number;
   private playerLeft: number;
-  private life: number;
+  private playerLife: number;
   constructor() {
     this.playerLeft = 80;
     this.playerTop = 50;
-    this.life = 100;
+    this.playerLife = 100;
   }
 
   getTopPosition(): number {return this.playerTop;}
 
   getLeftPosition(): number {return this.playerLeft;}
 
-  getLife(): number {return this.life;}
+  getplayerLife(): number {return this.playerLife;}
 
-  setTopPosition(top: number): void {this.playerTop = top}
+  setTopPosition(top: number): void {
+    if (top < 0) {
+      this.playerTop = 0
+    } else if(top > ELEMENTMAXHEIGHT) {
+      this.playerTop = ELEMENTMAXHEIGHT
+    } else {
+      this.playerTop = top
+    }
+  }
 
-  setLeftPosition(left: number): void {this.playerLeft = left} 
+  setLeftPosition(left: number): void {
+    if (left < 0) {
+      this.playerLeft = 0
+    } else if(left > ELEMENTMAXWIDTH) {
+      this.playerLeft = ELEMENTMAXWIDTH
+    } else {
+      this.playerLeft = left
+    }
+  } 
 
-  setLife(life: number): void {this.life = Math.max(life, 0)} 
+  setplayerLife(playerLife: number): void {this.playerLife = Math.max(playerLife, 0)} 
+
+  // Move the player based on pressed keys
+  updatePlayerPosition = () => {
+    const step = 1 // Step size in percentage
+    if (pressedKeys.has('ArrowLeft')) {
+      this.setLeftPosition(this.getLeftPosition() - step) // Prevent moving out of bounds (left edge)
+    }
+    if (pressedKeys.has('ArrowRight')) {
+      this.setLeftPosition(this.getLeftPosition() + step) // Prevent moving out of bounds (right edge)
+    }
+    if (pressedKeys.has('ArrowUp')) {
+      this.setTopPosition(this.getTopPosition() - step) // Prevent moving out of bounds (top edge)
+    }
+    if (pressedKeys.has('ArrowDown')) {
+      this.setTopPosition(this.getTopPosition() + step) // Prevent moving out of bounds (bottom edge)
+    }
+  }
 }
 
 // Enemy Class
@@ -41,6 +74,7 @@ class Enemy {
   private enemyLeft: number;
   private enemyTransition: boolean;
   private enemySleep: number;
+  private enemyLife: number;
   private ELEMENTMAXWIDTH: number;
 
   constructor(ELEMENTMAXWIDTH: number) {
@@ -49,6 +83,7 @@ class Enemy {
     this.enemyLeft = Math.random() * this.ELEMENTMAXWIDTH;
     this.enemyTransition = true;
     this.enemySleep = Math.round(Math.random() * 100);
+    this.enemyLife = 100;
   }
 
   getTopPosition(): number {return this.enemyTop;}
@@ -59,11 +94,15 @@ class Enemy {
 
   getSleepTime(): number {return this.enemySleep;}
 
+  getEnemyLife(): number {return this.enemyLife}
+
   setTopPosition(top: number): void {this.enemyTop = top}
 
-  setLeftPosition(left: number): void {this.enemyLeft = left} 
+  setLeftPosition(left: number): void {this.enemyLeft = left}
 
   setEnemySleep(sleepTime: number): void {this.enemySleep = sleepTime}
+
+  setEnemyLife(enemyLife: number): void {this.enemyLife =  Math.max(enemyLife, 0)}
 
   toggleTransition(state: boolean): void {this.enemyTransition = state}
 }
@@ -105,29 +144,11 @@ const pressedKeys = new Set<string>()
 // Interval ID for the game loop
 let gameLoopInterval: number | null = null
 
-// Function to random alien positions
+// Function to random all aliens' positions
 const randomAlienPositions = () => {
   enemyArray.value.forEach((enemy) => (
     enemy.setLeftPosition(Math.random() * ELEMENTMAXWIDTH)
   ))
-}
-
-// Move the player based on pressed keys
-const updatePlayerPosition = () => {
-  const step = 1 // Step size in percentage
-  if (pressedKeys.has('ArrowLeft')) {
-    player.value.setLeftPosition(Math.max(player.value.getLeftPosition() - step, 0)) // Prevent moving out of bounds (left edge)
-  }
-  if (pressedKeys.has('ArrowRight')) {
-    player.value.setLeftPosition(Math.min(player.value.getLeftPosition() + step, ELEMENTMAXWIDTH)) // Prevent moving out of bounds (right edge)
-  }
-  if (pressedKeys.has('ArrowUp')) {
-    player.value.setTopPosition(Math.max(player.value.getTopPosition() - step, 0)) // Prevent moving out of bounds (top edge)
-  }
-  if (pressedKeys.has('ArrowDown')) {
-    player.value.setTopPosition(Math.min(player.value.getTopPosition() + step, ELEMENTMAXHEIGHT
-)) // Prevent moving out of bounds (bottom edge)
-  }
 }
 
 // Move enemies
@@ -166,8 +187,8 @@ const updateEnemyPosition = () => {
 // Check collision
 const checkCollision = () => {
   if (enemyArray.value.filter(enemy => Math.abs(enemy.getLeftPosition()-player.value.getLeftPosition()) < ELEMENTSIZE*0.5 && Math.abs(enemy.getTopPosition()-player.value.getTopPosition()) < ELEMENTSIZE*0.5).length>0) {
-    player.value.setLife(player.value.getLife()-1)
-    console.log(player.value.getLife())
+    player.value.setplayerLife(player.value.getplayerLife()-1)
+    console.log(player.value.getplayerLife())
   }
 }
 
@@ -183,7 +204,7 @@ const handleKeyUp = (event: KeyboardEvent) => {
 // Start the game loop
 const startGameLoop = () => {
   gameLoopInterval = window.setInterval(() => {
-    updatePlayerPosition()
+    player.value.updatePlayerPosition()
     updateEnemyPosition()
     checkCollision()
   }, 30)
@@ -213,8 +234,8 @@ onBeforeUnmount(() => {
   stopGameLoop()
 })
 
-// Reactive bar width based on player's life
-const barWidth = computed(() => player.value.getLife() * 0.2 + '%')
+// Reactive bar width based on player's playerLife
+const barWidth = computed(() => player.value.getplayerLife() * 0.2 + '%')
 // Element size in string percentage of the screen
 const elementSize = ELEMENTSIZE + '%'
 </script>
