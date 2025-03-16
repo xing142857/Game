@@ -11,6 +11,9 @@ const ELEMENTMAXHEIGHT = 100-ELEMENTSIZE*2
 // Game difficulty
 let difficulty = 100
 
+// How many bullets player are fired.
+let bulletPlayerIndex = 0
+
 // Player Class
 class Player {
   private playerTop: number;
@@ -112,8 +115,8 @@ class BulletPlayer {
   private bulletPlayerTop: number;
   private bulletPlayerLeft: number;
   constructor() {
-    this.bulletPlayerLeft = 80;
-    this.bulletPlayerTop = 50;
+    this.bulletPlayerLeft = -100;
+    this.bulletPlayerTop = -100;
   }
 
   getTopPosition(): number {return this.bulletPlayerTop;}
@@ -188,7 +191,6 @@ const updateEnemyPosition = () => {
 const checkCollision = () => {
   if (enemyArray.value.filter(enemy => Math.abs(enemy.getLeftPosition()-player.value.getLeftPosition()) < ELEMENTSIZE*0.5 && Math.abs(enemy.getTopPosition()-player.value.getTopPosition()) < ELEMENTSIZE*0.5).length>0) {
     player.value.setplayerLife(player.value.getplayerLife()-1)
-    console.log(player.value.getplayerLife())
   }
 }
 
@@ -201,10 +203,19 @@ const handleKeyUp = (event: KeyboardEvent) => {
   pressedKeys.delete(event.key)
 }
 
+// Moniter the player's bullet and initial their start position
+const fireBulletPlayer = () => {
+  if (pressedKeys.has(' ')) {
+    bulletPlayerArray.value[bulletPlayerIndex].setLeftPosition(player.value.getLeftPosition())
+    bulletPlayerArray.value[bulletPlayerIndex].setTopPosition(player.value.getTopPosition())
+  }
+}
+
 // Start the game loop
 const startGameLoop = () => {
   gameLoopInterval = window.setInterval(() => {
     player.value.updatePlayerPosition()
+    fireBulletPlayer()
     updateEnemyPosition()
     checkCollision()
   }, 30)
@@ -265,6 +276,11 @@ const elementSize = ELEMENTSIZE + '%'
       src="./ShmupSprites/Bullet_player.png" 
       alt="bulletPlayer" 
       class="bulletPlayer"
+      :style="{
+        top: bulletPlayerArray[i].getTopPosition() + '%',
+        left: bulletPlayerArray[i].getLeftPosition() + '%',
+        transition: enemyArray[i].getTransitionState() ? 'top 0.03s linear, left 0.03s linear' : 'none'
+      }"
     />
 
     <img 
@@ -309,6 +325,10 @@ const elementSize = ELEMENTSIZE + '%'
 .Alien02 {
   position: absolute;
   width: v-bind(elementSize)
+}
+
+.bulletPlayer {
+  position: absolute;
 }
 
 </style>
