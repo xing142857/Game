@@ -3,6 +3,7 @@ import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 
 // Game constants
 const ELEMENT_SIZE = 5
+const BULLET_PLAYER_SIZE = 1
 const ELEMENT_MAX_WIDTH = 100 - ELEMENT_SIZE
 const ELEMENT_MAX_HEIGHT = 100 - ELEMENT_SIZE * 2
 const DIFFICULTY = 100
@@ -105,7 +106,7 @@ const checkCollision = () => {
 // Fire player bullets
 const fireBulletPlayer = () => {
   if (pressedKeys.value.has(' ')) {
-    playerBullets.value[bulletPlayerIndex].left = player.value.left
+    playerBullets.value[bulletPlayerIndex].left = player.value.left + ELEMENT_SIZE * 0.5 - BULLET_PLAYER_SIZE * 0.5
     playerBullets.value[bulletPlayerIndex].top = player.value.top
     
     // Cycle through bullets
@@ -156,6 +157,7 @@ onBeforeUnmount(() => {
 // Computed properties
 const barWidth = computed(() => player.value.life * 0.2 + '%')
 const elementSize = ELEMENT_SIZE + '%'
+const bulletPlayerSize = BULLET_PLAYER_SIZE + '%'
 </script>
 
 <template>
@@ -240,6 +242,6 @@ const elementSize = ELEMENT_SIZE + '%'
 
 .bullet-player {
   position: absolute;
-  width: 2%;
+  width: v-bind(bulletPlayerSize);
 }
 </style>
