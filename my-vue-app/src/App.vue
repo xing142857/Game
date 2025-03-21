@@ -1,227 +1,137 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 
-// Player and enemy's size in percentage of the screen.
-const ELEMENTSIZE = 5
+// Game constants
+const ELEMENT_SIZE = 5
+const ELEMENT_MAX_WIDTH = 100 - ELEMENT_SIZE
+const ELEMENT_MAX_HEIGHT = 100 - ELEMENT_SIZE * 2
+const DIFFICULTY = 100
 
-// Player and enemy's max width and height in percentage of the screen.
-const ELEMENTMAXWIDTH = 100-ELEMENTSIZE
-const ELEMENTMAXHEIGHT = 100-ELEMENTSIZE*2
-
-// Game difficulty
-let difficulty = 100
-
-// How many bullets player are fired.
+// Reactive state
+const pressedKeys = ref(new Set<string>())
+let gameLoopInterval: number | null = null
 let bulletPlayerIndex = 0
 
-// Player Class
-class Player {
-  private playerTop: number;
-  private playerLeft: number;
-  private playerLife: number;
-  constructor() {
-    this.playerLeft = 80;
-    this.playerTop = 50;
-    this.playerLife = 100;
+// Player state - using reactive object
+const player = ref({
+  top: 50,
+  left: 80,
+  life: 100
+})
+
+// Enemy array - directly using reactive array
+const enemies = ref(Array.from({ length: DIFFICULTY }, () => ({
+  top: 0,
+  left: Math.random() * ELEMENT_MAX_WIDTH,
+  transition: true,
+  sleep: Math.round(Math.random() * 100),
+  life: 100
+})))
+
+// Bullet array
+const playerBullets = ref(Array.from({ length: 100 }, () => ({
+  top: -100,
+  left: -100
+})))
+
+// Helper function to constrain position
+const constrainPosition = (value: number, max: number) => {
+  if (value < 0) return 0
+  if (value > max) return max
+  return value
+}
+
+// Update player position
+const updatePlayerPosition = () => {
+  const step = 1
+  
+  if (pressedKeys.value.has('ArrowLeft')) {
+    player.value.left = constrainPosition(player.value.left - step, ELEMENT_MAX_WIDTH)
   }
-
-  getTopPosition(): number {return this.playerTop;}
-
-  getLeftPosition(): number {return this.playerLeft;}
-
-  getplayerLife(): number {return this.playerLife;}
-
-  setTopPosition(top: number): void {
-    if (top < 0) {
-      this.playerTop = 0
-    } else if(top > ELEMENTMAXHEIGHT) {
-      this.playerTop = ELEMENTMAXHEIGHT
-    } else {
-      this.playerTop = top
-    }
+  if (pressedKeys.value.has('ArrowRight')) {
+    player.value.left = constrainPosition(player.value.left + step, ELEMENT_MAX_WIDTH)
   }
-
-  setLeftPosition(left: number): void {
-    if (left < 0) {
-      this.playerLeft = 0
-    } else if(left > ELEMENTMAXWIDTH) {
-      this.playerLeft = ELEMENTMAXWIDTH
-    } else {
-      this.playerLeft = left
-    }
-  } 
-
-  setplayerLife(playerLife: number): void {this.playerLife = Math.max(playerLife, 0)} 
-
-  // Move the player based on pressed keys
-  updatePlayerPosition = () => {
-    const step = 1 // Step size in percentage
-    if (pressedKeys.has('ArrowLeft')) {
-      this.setLeftPosition(this.getLeftPosition() - step) // Prevent moving out of bounds (left edge)
-    }
-    if (pressedKeys.has('ArrowRight')) {
-      this.setLeftPosition(this.getLeftPosition() + step) // Prevent moving out of bounds (right edge)
-    }
-    if (pressedKeys.has('ArrowUp')) {
-      this.setTopPosition(this.getTopPosition() - step) // Prevent moving out of bounds (top edge)
-    }
-    if (pressedKeys.has('ArrowDown')) {
-      this.setTopPosition(this.getTopPosition() + step) // Prevent moving out of bounds (bottom edge)
-    }
+  if (pressedKeys.value.has('ArrowUp')) {
+    player.value.top = constrainPosition(player.value.top - step, ELEMENT_MAX_HEIGHT)
+  }
+  if (pressedKeys.value.has('ArrowDown')) {
+    player.value.top = constrainPosition(player.value.top + step, ELEMENT_MAX_HEIGHT)
   }
 }
 
-// Enemy Class
-class Enemy {
-  private enemyTop: number;
-  private enemyLeft: number;
-  private enemyTransition: boolean;
-  private enemySleep: number;
-  private enemyLife: number;
-  private ELEMENTMAXWIDTH: number;
-
-  constructor(ELEMENTMAXWIDTH: number) {
-    this.ELEMENTMAXWIDTH = ELEMENTMAXWIDTH;
-    this.enemyTop = 0;
-    this.enemyLeft = Math.random() * this.ELEMENTMAXWIDTH;
-    this.enemyTransition = true;
-    this.enemySleep = Math.round(Math.random() * 100);
-    this.enemyLife = 100;
-  }
-
-  getTopPosition(): number {return this.enemyTop;}
-
-  getLeftPosition(): number {return this.enemyLeft;}
-
-  getTransitionState(): boolean {return this.enemyTransition;}
-
-  getSleepTime(): number {return this.enemySleep;}
-
-  getEnemyLife(): number {return this.enemyLife}
-
-  setTopPosition(top: number): void {this.enemyTop = top}
-
-  setLeftPosition(left: number): void {this.enemyLeft = left}
-
-  setEnemySleep(sleepTime: number): void {this.enemySleep = sleepTime}
-
-  setEnemyLife(enemyLife: number): void {this.enemyLife =  Math.max(enemyLife, 0)}
-
-  toggleTransition(state: boolean): void {this.enemyTransition = state}
-}
-
-// BulletPlayer Class
-class BulletPlayer {
-  private bulletPlayerTop: number;
-  private bulletPlayerLeft: number;
-  constructor() {
-    this.bulletPlayerLeft = -100;
-    this.bulletPlayerTop = -100;
-  }
-
-  getTopPosition(): number {return this.bulletPlayerTop;}
-
-  getLeftPosition(): number {return this.bulletPlayerLeft;}
-
-  setTopPosition(top: number): void {this.bulletPlayerTop = top}
-
-  setLeftPosition(left: number): void {this.bulletPlayerLeft = left} 
-}
-
-// Enemy Array
-const enemyArray = ref<Enemy[]>(
-  Array.from({ length: difficulty }, () => new Enemy(ELEMENTMAXWIDTH))
-);
-
-// Player
-const player = ref(new Player())
-
-// Player Bullet Array
-const bulletPlayerArray = ref<BulletPlayer[]>(
-  Array.from({ length: 100 }, () => new BulletPlayer())
-);
-
-// Set to track currently pressed keys
-const pressedKeys = new Set<string>()
-
-// Interval ID for the game loop
-let gameLoopInterval: number | null = null
-
-// Function to random all aliens' positions
+// Randomize enemy positions
 const randomAlienPositions = () => {
-  enemyArray.value.forEach((enemy) => (
-    enemy.setLeftPosition(Math.random() * ELEMENTMAXWIDTH)
-  ))
+  enemies.value.forEach(enemy => {
+    enemy.left = Math.random() * ELEMENT_MAX_WIDTH
+  })
 }
 
-// Move enemies
+// Update enemy positions
 const updateEnemyPosition = () => {
-  enemyArray.value.forEach((enemy) => {
-    
-    if (enemy.getSleepTime() > 0) {
-      enemy.toggleTransition(false);
-      enemy.setEnemySleep(enemy.getSleepTime()-1);
-      enemy.setLeftPosition(-100);
-      enemy.setTopPosition(-100);
-      return -100
+  enemies.value.forEach(enemy => {
+    if (enemy.sleep > 0) {
+      enemy.transition = false
+      enemy.sleep -= 1
+      enemy.left = -100
+      enemy.top = -100
+    } else if (enemy.sleep === 0) {
+      enemy.transition = false
+      enemy.sleep -= 1
+      enemy.left = Math.random() * ELEMENT_MAX_WIDTH
+      enemy.top = 0
+    } else if (enemy.top >= ELEMENT_MAX_HEIGHT) {
+      enemy.transition = false
+      enemy.sleep = Math.round(Math.random() * 100)
+      enemy.top = -100
+    } else {
+      enemy.transition = true
+      enemy.top += 1
     }
-    else if (enemy.getSleepTime() == 0) {
-      enemy.toggleTransition(false);
-      enemy.setEnemySleep(enemy.getSleepTime()-1);
-      enemy.setLeftPosition(Math.random() * ELEMENTMAXWIDTH);
-      enemy.setTopPosition(0);
-      return 0;
-    }
-    else if (enemy.getTopPosition() >= ELEMENTMAXHEIGHT
-) {
-      enemy.toggleTransition(false);
-      enemy.setEnemySleep(Math.round(Math.random() * 100));
-      enemy.setTopPosition(-100);
-      return -100;
-    }
-    else{
-      enemy.toggleTransition(true);
-      enemy.setTopPosition(enemy.getTopPosition()+1);
-      return 1;
-    }
-  });
+  })
 }
 
-// Check collision
+// Check for collisions
 const checkCollision = () => {
-  if (enemyArray.value.filter(enemy => Math.abs(enemy.getLeftPosition()-player.value.getLeftPosition()) < ELEMENTSIZE*0.5 && Math.abs(enemy.getTopPosition()-player.value.getTopPosition()) < ELEMENTSIZE*0.5).length>0) {
-    player.value.setplayerLife(player.value.getplayerLife()-1)
+  const hitEnemy = enemies.value.find(enemy => 
+    Math.abs(enemy.left - player.value.left) < ELEMENT_SIZE * 0.5 && 
+    Math.abs(enemy.top - player.value.top) < ELEMENT_SIZE * 0.5
+  )
+  
+  if (hitEnemy) {
+    player.value.life = Math.max(player.value.life - 1, 0)
   }
 }
 
-// Event handlers to update pressed keys
+// Fire player bullets
+const fireBulletPlayer = () => {
+  if (pressedKeys.value.has(' ')) {
+    playerBullets.value[bulletPlayerIndex].left = player.value.left
+    playerBullets.value[bulletPlayerIndex].top = player.value.top
+    
+    // Cycle through bullets
+    bulletPlayerIndex = (bulletPlayerIndex + 1) % playerBullets.value.length
+  }
+}
+
+// Keyboard event handlers
 const handleKeyDown = (event: KeyboardEvent) => {
-  pressedKeys.add(event.key)
+  pressedKeys.value.add(event.key)
 }
 
 const handleKeyUp = (event: KeyboardEvent) => {
-  pressedKeys.delete(event.key)
+  pressedKeys.value.delete(event.key)
 }
 
-// Moniter the player's bullet and initial their start position
-const fireBulletPlayer = () => {
-  if (pressedKeys.has(' ')) {
-    bulletPlayerArray.value[bulletPlayerIndex].setLeftPosition(player.value.getLeftPosition())
-    bulletPlayerArray.value[bulletPlayerIndex].setTopPosition(player.value.getTopPosition())
-  }
-}
-
-// Start the game loop
+// Game loop functions
 const startGameLoop = () => {
   gameLoopInterval = window.setInterval(() => {
-    player.value.updatePlayerPosition()
+    updatePlayerPosition()
     fireBulletPlayer()
     updateEnemyPosition()
     checkCollision()
   }, 30)
 }
 
-// Stop the game loop
 const stopGameLoop = () => {
   if (gameLoopInterval !== null) {
     clearInterval(gameLoopInterval)
@@ -229,7 +139,7 @@ const stopGameLoop = () => {
   }
 }
 
-// Attach event listeners and start the game loop on mount
+// Lifecycle hooks
 onMounted(() => {
   window.addEventListener('keydown', handleKeyDown)
   window.addEventListener('keyup', handleKeyUp)
@@ -237,63 +147,64 @@ onMounted(() => {
   startGameLoop()
 })
 
-// Clean up event listeners and game loop on unmount
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleKeyDown)
   window.removeEventListener('keyup', handleKeyUp)
-  randomAlienPositions()
   stopGameLoop()
 })
 
-// Reactive bar width based on player's playerLife
-const barWidth = computed(() => player.value.getplayerLife() * 0.2 + '%')
-// Element size in string percentage of the screen
-const elementSize = ELEMENTSIZE + '%'
+// Computed properties
+const barWidth = computed(() => player.value.life * 0.2 + '%')
+const elementSize = ELEMENT_SIZE + '%'
 </script>
 
 <template>
-  <div class="outsideBox">
+  <div class="outside-box">
     <img src="./ShmupSprites/Bar.png" alt="Bar" class="bar">
-    <img src="./ShmupSprites/Bar_empty.png" alt="Bar_empty" class="barEmpty">
-    <!-- Player position dynamically controlled via style binding -->
+    <img src="./ShmupSprites/Bar_empty.png" alt="Bar_empty" class="bar-empty">
     
+    <!-- Enemies -->
     <img 
-      v-for="(_, i) in enemyArray" 
-      :key="i"
+      v-for="(enemy, i) in enemies" 
+      :key="`enemy-${i}`"
       src="./ShmupSprites/Alien02.png" 
       alt="Alien02" 
-      class="Alien02"
+      class="alien"
       :style="{
-        top: enemyArray[i].getTopPosition() + '%',
-        left: enemyArray[i].getLeftPosition() + '%',
-        transition: enemyArray[i].getTransitionState() ? 'top 0.03s linear, left 0.03s linear' : 'none'
+        top: `${enemy.top}%`,
+        left: `${enemy.left}%`,
+        transition: enemy.transition ? 'top 0.03s linear, left 0.03s linear' : 'none'
       }" 
     />
 
+    <!-- Player bullets -->
     <img 
-      v-for="(_, i) in bulletPlayerArray" 
-      :key="i"
+      v-for="(bullet, i) in playerBullets" 
+      :key="`bullet-${i}`"
       src="./ShmupSprites/Bullet_player.png" 
       alt="bulletPlayer" 
-      class="bulletPlayer"
+      class="bullet-player"
       :style="{
-        top: bulletPlayerArray[i].getTopPosition() + '%',
-        left: bulletPlayerArray[i].getLeftPosition() + '%',
-        transition: enemyArray[i].getTransitionState() ? 'top 0.03s linear, left 0.03s linear' : 'none'
+        top: `${bullet.top}%`,
+        left: `${bullet.left}%`
       }"
     />
 
+    <!-- Player -->
     <img 
       src="./ShmupSprites/Player.png" 
       alt="Player" 
       class="player" 
-      :style="{ top: player.getTopPosition() + '%', left: player.getLeftPosition() + '%' }" 
+      :style="{ 
+        top: `${player.top}%`, 
+        left: `${player.left}%` 
+      }" 
     />
   </div>
 </template>
 
 <style scoped>
-.outsideBox {
+.outside-box {
   width: 90%;
   height: 90vh;
   position: absolute;
@@ -303,7 +214,7 @@ const elementSize = ELEMENTSIZE + '%'
   border: 3px solid green;
 }
 
-.barEmpty {
+.bar-empty {
   position: absolute;
   height: 20px;
   width: 20%;
@@ -318,17 +229,17 @@ const elementSize = ELEMENTSIZE + '%'
 
 .player {
   position: absolute;
-  transition: top 0.03s linear, left 0.03s linear; /* Smooth movement */
-  width: v-bind(elementSize)
+  transition: top 0.03s linear, left 0.03s linear;
+  width: v-bind(elementSize);
 }
 
-.Alien02 {
+.alien {
   position: absolute;
-  width: v-bind(elementSize)
+  width: v-bind(elementSize);
 }
 
-.bulletPlayer {
+.bullet-player {
   position: absolute;
+  width: 2%;
 }
-
 </style>
